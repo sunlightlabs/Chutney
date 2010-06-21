@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Chutney.  Fresh &amp; Hot.{% endblock %}
+{% block content %}
+    <a href='javascript:
+        var brisketLoaded = false;
+        function loadBrisket() {
+            if (typeof window.brisket == "undefined") {
+                if (!brisketLoaded) {
+                    var script = document.createElement("script"); 
+                    script.src = "http://{{SERVER_NAME}}{{ MEDIA_URL }}bm.js"; 
+                    document.getElementsByTagName("head")[0].appendChild(script); 
+                }
+                setTimeout("loadBrisket()", 50);   
+            } else {
+                brisket.start();
+            }
+        }
+        loadBrisket();
+        '>Chutney</a>
+{% endblock %}
