@@ -1,0 +1,86 @@
+/* line 7, ././style.sass */
+#chutney {
+  font-family: Cambria, Georgia, Times, "Times New Roman", serif;
+  font-size: 10pt;
+  line-height: 1.5em;
+}
+/* line 13, ././style.sass */
+#chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
+  font-family: Cambria, Georgia, Times, "Times New Roman", serif;
+}
+/* line 15, ././style.sass */
+#chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
+  margin-left: -0.5em;
+  font-size: 1.8em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+/* line 21, ././style.sass */
+#chutney h2 {
+  font-size: 1.4em;
+}
+/* line 23, ././style.sass */
+#chutney h3 {
+  font-size: 1.2em;
+}
+/* line 25, ././style.sass */
+#chutney h4 {
+  font-size: 1em;
+}
+/* line 27, ././style.sass */
+#chutney h5 {
+  font-size: 0.8em;
+}
+/* line 29, ././style.sass */
+#chutney h6 {
+  font-size: 0.6em;
+}
+/* line 31, ././style.sass */
+#chutney p {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+/* line 35, ././style.sass */
+#chutney .mono {
+  font-family: monospace;
+}
+/* line 38, ././style.sass */
+#chutney small {
+  font-size: 0.8em;
+}
+/* line 41, ././style.sass */
+#chutney strong {
+  font-weight: bold;
+}
+/* line 44, ././style.sass */
+#chutney table.chutney-txs {
+  border-collapse: collapse;
+}
+/* line 46, ././style.sass */
+#chutney table.chutney-txs tr.chutney-tx, #chutney table.chutney-txs tr.chutney-issues {
+  padding: 0.1em;
+  border: 1px solid #333333;
+  padding: 0.2em;
+}
+/* line 51, ././style.sass */
+#chutney table.chutney-txs tr.matched {
+  border-bottom: none;
+}
+/* line 53, ././style.sass */
+#chutney table.chutney-txs tr.chutney-issues {
+  border-top: none;
+}
+/* line 56, ././style.sass */
+#chutney table.chutney-txs td.pos {
+  color: green;
+}
+/* line 59, ././style.sass */
+#chutney table.chutney-txs .match {
+  font-weight: bold;
+}
+/* line 61, ././style.sass */
+#chutney table.chutney-txs .chutney-issues {
+  color: #999999;
+  font-size: smaller;
+}

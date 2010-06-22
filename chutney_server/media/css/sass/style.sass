@@ -1,0 +1,72 @@
+@import "compass/reset/utilities"
+@import "blueprint"
+
+blueprint #chutney
+nested-reset #chutney
+
+#chutney
+  // Basics
+  font-family: Cambria, Georgia, Times, "Times New Roman", serif
+  font-size: 10pt
+  line-height: 1.5em
+
+  h1,h2,h3,h4,h5,h6
+    font-family: Cambria, Georgia, Times, "Times New Roman", serif
+  h1, h2, h3, h4, h5, h6
+    margin-left: -0.5em
+    font-size: 1.8em
+    margin-top: 0.5em
+    margin-bottom: 0.5em
+    font-weight: bold
+  h2 
+    font-size: 1.4em
+  h3
+    font-size: 1.2em
+  h4
+    font-size: 1em
+  h5
+    font-size: 0.8em
+  h6
+    font-size: 0.6em
+  p
+    margin-top: 1.5em
+    margin-bottom: 1.5em
+  
+  .mono
+    font-family: monospace
+  
+  small
+    font-size: 0.8em
+  
+  strong
+    font-weight: bold
+
+  table.chutney-txs
+    border-collapse: collapse
+    tr.chutney-tx, tr.chutney-issues
+      padding: 0.1em
+      border: 1px solid #333
+      padding: 0.2em
+
+    tr.matched
+      border-bottom: none
+    tr.chutney-issues
+      border-top: none 
+
+    td.pos
+      color: green
+
+    .match
+      font-weight: bold
+    .chutney-issues
+      color: #999
+      font-size: smaller
+
+     
+
+      
+      
+  
+
+  
+
