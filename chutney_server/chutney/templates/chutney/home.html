@@ -2,19 +2,20 @@
 {% block title %}Chutney.  Fresh &amp; Hot.{% endblock %}
 {% block content %}
     <a href='javascript:
-        var brisketLoaded = false;
-        function loadBrisket() {
-            if (typeof window.brisket == "undefined") {
-                if (!brisketLoaded) {
+        var chutneyLoaded = false;
+        function loadChutney() {
+            if (typeof window.chutney == "undefined") {
+                if (!chutneyLoaded) {
                     var script = document.createElement("script"); 
-                    script.src = "http://{{SERVER_NAME}}{{ MEDIA_URL }}bm.js"; 
+                    script.src = "{{SERVER_URL}}{{ MEDIA_URL }}js/chutney.js"; 
                     document.getElementsByTagName("head")[0].appendChild(script); 
+                    chutneyLoaded = true;
                 }
-                setTimeout("loadBrisket()", 50);   
+                setTimeout("loadChutney()", 50);   
             } else {
-                brisket.start();
+                chutney.start();
             }
         }
-        loadBrisket();
+        loadChutney();
         '>Chutney</a>
 {% endblock %}

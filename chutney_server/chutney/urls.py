@@ -6,6 +6,6 @@ urlpatterns = patterns('chutney.views',
     (r'^search.json', 'search'),
     (r'^$', direct_to_template, {
         'template': 'chutney/home.html', 
-        'extra_context': {'SERVER_NAME': settings.SERVER_NAME}
+        'extra_context': {'SERVER_URL': settings.SERVER_URL}
     })
 )
