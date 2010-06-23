@@ -60,27 +60,67 @@
 /* line 46, ././style.sass */
 #chutney table.chutney-txs tr.chutney-tx, #chutney table.chutney-txs tr.chutney-issues {
   padding: 0.1em;
-  border: 1px solid #333333;
+  border: 1px solid #aaaaaa;
   padding: 0.2em;
 }
 /* line 51, ././style.sass */
+#chutney table.chutney-txs .wrong-match {
+  visibility: hidden;
+  color: #999999;
+  margin-left: 2em;
+}
+/* line 55, ././style.sass */
+#chutney table.chutney-txs .wrong-match a, #chutney table.chutney-txs .wrong-match a:visited {
+  color: #c500c5;
+}
+/* line 58, ././style.sass */
 #chutney table.chutney-txs tr.matched {
   border-bottom: none;
 }
-/* line 53, ././style.sass */
+/* line 61, ././style.sass */
+#chutney table.chutney-txs tr.matched:hover .wrong-match {
+  visibility: visible;
+}
+/* line 64, ././style.sass */
 #chutney table.chutney-txs tr.chutney-issues {
   border-top: none;
 }
-/* line 56, ././style.sass */
+/* line 67, ././style.sass */
 #chutney table.chutney-txs td.pos {
   color: green;
 }
-/* line 59, ././style.sass */
+/* line 71, ././style.sass */
+#chutney table.chutney-txs td.party-breakdown div {
+  width: 70px;
+  height: 60px;
+}
+/* line 75, ././style.sass */
 #chutney table.chutney-txs .match {
   font-weight: bold;
 }
-/* line 61, ././style.sass */
-#chutney table.chutney-txs .chutney-issues {
+/* line 77, ././style.sass */
+#chutney table.chutney-txs .chutney-issues, #chutney table.chutney-txs .chutney-issues a, #chutney table.chutney-txs .chutney-issues a:visited {
   color: #999999;
   font-size: smaller;
+}
+/* line 81, ././style.sass */
+#chutney .totals {
+  overflow: hidden;
+  display: inline-block;
+}
+/* line 8, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/utilities/general/./_hacks.scss */
+#chutney .totals {
+  display: block;
+}
+/* line 84, ././style.sass */
+#chutney .totals .total-party-breakdown {
+  width: 270px;
+  height: 150px;
+  float: left;
+}
+/* line 89, ././style.sass */
+#chutney .totals .recipient-totals {
+  width: 630px;
+  height: 200px;
+  float: left;
 }

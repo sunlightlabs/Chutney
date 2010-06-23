@@ -45,22 +45,51 @@ nested-reset #chutney
     border-collapse: collapse
     tr.chutney-tx, tr.chutney-issues
       padding: 0.1em
-      border: 1px solid #333
+      border: 1px solid #aaa
       padding: 0.2em
+
+    .wrong-match
+      visibility: hidden
+      color: #999
+      margin-left: 2em
+      a, a:visited
+        color: #C500C5
 
     tr.matched
       border-bottom: none
+      &:hover
+        .wrong-match
+          visibility: visible
+
     tr.chutney-issues
       border-top: none 
 
     td.pos
       color: green
 
+    td.party-breakdown
+      div 
+        width: 70px
+        height: 60px
+
     .match
       font-weight: bold
-    .chutney-issues
+    .chutney-issues, .chutney-issues a, .chutney-issues a:visited
       color: #999
       font-size: smaller
+
+  .totals
+    +clearfix
+
+    .total-party-breakdown
+      width: 270px
+      height: 150px
+      float: left
+    
+    .recipient-totals
+      width: 630px
+      height: 200px
+      float: left
 
      
 
