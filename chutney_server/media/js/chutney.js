@@ -16,7 +16,6 @@ var scripts = [
     MEDIA_URL + "/js/g.raphael-min.js",
     MEDIA_URL + "/js/g.pie.patched.js",
     MEDIA_URL + "/js/g.bar.jeremi.js",
-    MEDIA_URL + "/js/g.line-min.js",
     MEDIA_URL + "/js/brisket_charts.js",
     MEDIA_URL + "/js/underscore-1.0.4.js",
 
@@ -101,17 +100,13 @@ function minipie(div, data, type) {
 }
 
 function slugify(string) {
-    string = string.toLowerCase();
-    string = string.replace(/[^-a-z0-9]/g, '-');
-    return string;
+    return string.trim().toLowerCase().replace(/[^-a-z0-9]/g, '-');
 }
 /*
 *  Return the brisket URL for a politician given as {id: "...id...", name: "...name..."}
 */
 function recipientUrl(recipient) {
     return BRISKET_URL + "/politician/" + slugify(recipient.name) + "/" + recipient.id;
-
-
 }
 
 
@@ -152,151 +147,34 @@ var chutney = {
         } else {
             jQuery.noConflict();
             $ = jQuery;
-            chutney.run();
+            console.log("Chutney run!");
+            chutney.setUp();
+            // Funny scroll positions mess up modal dialog.
+            $(window).scrollTop(0);
+            chutney.div.dialog('open');
+            chutney.parseTransactions();
+            chutney.queryApi();
+            chutney.recipe();
         }
     },
-    /*
-    *  Pull corporation names out of the current page, then query brisket.
-    */
-    run: function() {
-        console.log("Chutney run!");
-        chutney.setUp();
-        // Funny scroll positions mess up modal dialog.
-        $(window).scrollTop(0);
-        chutney.div.dialog('open');
-        chutney.parseTransactions();
-        chutney.queryBrisket();
-    },
-    queryBrisket: function() {
-        var escaped = [];
-        for (var name in chutney.txdata.tx_corp_names) {
-            escaped.push(escape(name));
+    recipes: ["&frac12; cup fresh mint", "a bunch of fresh cilantro", "1 green chile (crushed)", 
+        "1&frac12; tablespoons of onion", "3 tablespoons lemon", "salt", "blend&hellip;"],
+    recipe: function() {
+        if (chutney.recipeDone) {
+            return;
         }
-        var query = escaped.join(",");
-        $("body").ajaxError(function(e, xhr, settings, exception) {
-            console.log(e);
-            console.log(xhr);
-            $("#chutneyContent").html("Error communicating with server.");
-        });
-        console.log("querying...");
-        $.getJSON(SERVER_URL + "/search.json?q=" + query + "&callback=?", 
-                 this.handleCorps);
-
-    },
-    /*
-    *  Pull transactions and corporations out of the current page.
-    */
-    parseTransactions: function() {
-        // mint 
-        chutney.txdata.txs = [];
-        chutney.txdata.tx_corp_names = {};
-        $("#transaction-list-body > tr").each(function(index) {
-            var desc = $(this).children("td[title]");
-            var name = desc.text();
-            chutney.txdata.txs.push({
-                'name': name,
-                'amount': dollarsToFloat($(this).children("td.money").text()),
-                'date': $(this).children("td.date").text(),
-                'orig': desc.attr("title"),
-                'order': index
-            });
-            if (typeof chutney.txdata.tx_corp_names[name] == "undefined") {
-                chutney.txdata.tx_corp_names[name] = 1;
-            } else {
-                chutney.txdata.tx_corp_names[name] += 1;
-            }
-        });
-        console.log(chutney.txdata);
-    },
-    removeMatch: function(tx_order) {
-        var txdata = chutney.txdata;
-        var bad = {};
-        /* TODO:
-        *   * set up cookie
-        *   * adjust totals, redraw totals graphs
-        *   * change from a TX based id to a tx -> corp mapping
-        *   * Nice long transition effect on removal/addition.
-        *   * Add a corolary for adding mapping.
-        */
-        for (var i = 0; i < txdata.txs.length; i++) {
-            if (txdata.txs[i].order == tx_order) {
-                var tx = txdata.txs[i];
-                if (!tx.corp) {
-                    return;
-                }
-                bad[tx.name] = tx.corp.info.id;
-                delete txdata.corps[tx.name];
-                delete tx.corp;
-
-                $(".tx" + tx.order).remove();
-                var els = chutney.buildTxRow(tx);
-                for (var i = 0; i < $("table.unmatched tr").length; i++) {
-                    if ($(this).data('order') > tx_order) {
-                        for (var j = 0; j < els.length; j++) {
-                            $(this).before(els[i]);
-                        }
-                        break;
-                    }
-                }
-                return;
-            }
-
+        if (chutney.recipeIndex == undefined) {
+            chutney.recipeIndex = 0;
+            $("#chutney .loading").html("<ul class='recipe'></ul>" + spinner);
         }
-
-    },
-    /*
-    *  Callback for corporation match and brisket queries.  Store data, then display.
-    */
-    handleCorps: function(data) {
-        var txdata = chutney.txdata;
-        txdata.matched = [];
-        txdata.unmatched = [];
-        txdata.corps = data.results;
-        for (var i = 0; i < chutney.txdata.txs.length; i++) {
-            var tx = txdata.txs[i];
-            if (txdata.corps[tx.name] != undefined) {
-                tx.corp = chutney.txdata.corps[tx.name];
-                tx.corp.url = BRISKET_URL + "/organization/" + slugify(tx.corp.info.name) + 
-                    "/" + tx.corp.info.id;
-                if (tx.amount < 0) {
-                    var pb = tx.corp.party_breakdown;
-                    r = pb.Republicans != undefined ? parseFloat(pb.Republicans[1]) : 0;
-                    d = pb.Democrats != undefined ? parseFloat(pb.Democrats[1]) : 0;
-                    o = pb.Other != undefined ? parseFloat(pb.Other[1]) : 0;
-                    var total = r + d + o;
-                    tx.party_breakdown = {
-                        'Republicans': tx.amount * (r / total),
-                        'Democrats': tx.amount * (d / total),
-                        'Other': tx.amount * (o / total)
-                    };
-                    txdata.totals.Republicans += tx.party_breakdown.Republicans;
-                    txdata.totals.Democrats += tx.party_breakdown.Democrats;
-                    txdata.totals.Other += tx.party_breakdown.Other;
-                    txdata.totals.matched += tx.amount;
-                    for (var j = 0; j < tx.corp.recipients.length; j++) {
-                        var recipient = tx.corp.recipients[j];
-                        if (txdata.totals.recipients[recipient.name] == undefined) {
-                            txdata.totals.recipients[recipient.name] = 0;
-                        }
-                        val = parseFloat(recipient.total_amount);
-                        txdata.totals.recipients[recipient.name] += val;
-                        txdata.totals.all_recipients += val;
-                        txdata.recipient_ids[recipient.name] = recipient.id;
-                    }
-                }
-                txdata.matched.push(tx);
-            } else {
-                if (tx.amount < 0) {
-                    txdata.totals.unmatched += tx.amount;
-                }
-                txdata.unmatched.push(tx);
-            }
+        $("#chutney .recipe").append("<li>" + chutney.recipes[chutney.recipeIndex] + "</li>");
+        if (chutney.recipeIndex + 1 < chutney.recipes.length) {
+            chutney.recipeIndex += 1;
         }
-        console.log(chutney.txdata);
-        chutney.show();
+        setTimeout(chutney.recipe, 1500);
     },
     /*
-    *  Create the overlay that we will display things in.
+    *  Create the overlay that we will display things in, and set up data structures.
     */
     setUp: function() {
         // A queue of functions to execute after we've loaded everything we need to
@@ -329,66 +207,170 @@ var chutney = {
             });
         }
         if (chutney.txdata == undefined) {
-            chutney.txdata = {
-                tx_corp_names: {},
-                txs: [],
-                totals: {
-                    Republicans: 0,
-                    Democrats: 0,
-                    Other: 0,
-                    matched: 0,
-                    unmatched: 0,
-                    all_recipients: 0,
-                    recipients: {}
-                },
-                recipient_ids: {},
-            };
+            chutney.txdata = {};
+        }
+        if (chutney.overrides == undefined) {
+            // read cookie        
+        }
+    },
+    /*
+    *  Pull transactions out of the current page.
+    */
+    parseTransactions: function() {
+        // mint.com
+        chutney.txdata.txs = [];
+        chutney.txdata.tx_corp_names = {};
+        $("#transaction-list-body > tr").each(function(index) {
+            var desc = $(this).children("td[title]");
+            var name = desc.text();
+            chutney.txdata.txs.push({
+                'name': name,
+                'amount': dollarsToFloat($(this).children("td.money").text()),
+                'date': $(this).children("td.date").text(),
+                'orig': desc.attr("title"),
+                'order': index
+            });
+            if (typeof chutney.txdata.tx_corp_names[name] == "undefined") {
+                chutney.txdata.tx_corp_names[name] = 1;
+            } else {
+                chutney.txdata.tx_corp_names[name] += 1;
+            }
+        });
+    },
+    queryApi: function() {
+        var escaped = [];
+        for (var name in chutney.txdata.tx_corp_names) {
+            escaped.push(escape(name));
+        }
+        var query = escaped.join(",");
+        $(window).ajaxError(function(e, xhr, settings, exception) {
+            console.log(e);
+            console.log(xhr);
+            $("#chutneyContent").html("Error communicating with server.");
+        });
+        console.log("querying...");
+        $.getJSON(SERVER_URL + "/search.json?q=" + query + "&callback=?", 
+                 this.handleCorps);
+
+    },
+    /*
+    *  Callback for corporation match and brisket queries.  Store data, then display.
+    */
+    handleCorps: function(data) {
+        var txdata = chutney.txdata;
+        txdata.matched = [];
+        txdata.unmatched = [];
+        txdata.corps = data.results;
+        for (var i = 0; i < chutney.txdata.txs.length; i++) {
+            var tx = txdata.txs[i];
+            if (txdata.corps[tx.name] != undefined) {
+                tx.corp = chutney.txdata.corps[tx.name];
+                tx.corp.url = BRISKET_URL + "/organization/" + slugify(tx.corp.info.name) + 
+                    "/" + tx.corp.info.id;
+                if (tx.amount < 0) {
+                    var pb = tx.corp.party_breakdown;
+                    r = pb.Republicans != undefined ? parseFloat(pb.Republicans[1]) : 0;
+                    d = pb.Democrats != undefined ? parseFloat(pb.Democrats[1]) : 0;
+                    o = pb.Other != undefined ? parseFloat(pb.Other[1]) : 0;
+                    var total = r + d + o;
+                    tx.party_breakdown = {
+                        'Republicans': tx.amount * (r / total),
+                        'Democrats': tx.amount * (d / total),
+                        'Other': tx.amount * (o / total)
+                    };
+                }
+                txdata.matched.push(tx);
+            } else {
+                txdata.unmatched.push(tx);
+            }
+            tx.mappingId = chutney.getMappingId(tx);
+        }
+        chutney.calculateTotals();
+        console.log(chutney.txdata);
+        chutney.show();
+    },
+    getMappingId: function(tx) {
+        return (tx.corp ? tx.corp.info.id : "unmatched") + slugify(tx.name);
+    },
+    removeMatch: function(mappingId) {
+        $("." + mappingId).fadeOut(function() { $(this).remove(); });
+        var i = 0;
+        while (i < chutney.txdata.matched.length) {
+            var tx = chutney.txdata.matched[i];
+            if (tx.mappingId == mappingId) {
+                // remove old row and references.
+                chutney.txdata.matched.splice(i, 1);
+                delete tx.corp;
+                delete tx.party_breakdown;
+                delete chutney.txdata.corps[tx.name];
+                tx.mappingId = chutney.getMappingId(tx);
+
+                // Insert the row in 'unmatched'
+                var newRow = chutney.buildTxRow(tx);
+                var added = false;
+                for (var j = 0; j < chutney.txdata.unmatched.length; j++) {
+                    if (chutney.txdata.unmatched[j].order > tx.order) {
+                        console.log(chutney.txdata.unmatched[j]);
+                        $(".order" + chutney.txdata.unmatched[j].order).before(newRow);
+                        added = true;
+                        chutney.txdata.unmatched.splice(j, 0, tx);
+                        break;
+                    }
+                }
+                if (!added) {
+                    // it goes at the end
+                    $("#chutneyUnmatched table.unmatched").append(newRow);
+                    chutney.txdata.unmatched.append(tx);
+                }
+            } else {
+                i++;
+            }
+        }
+        chutney.calculateTotals();
+        chutney.drawTotals();
+    },
+    addMatch: function(tx_order) {
+        console.log(tx_order);
+    },
+    calculateTotals: function() {
+        var txdata = chutney.txdata;
+        txdata.totals = {
+            Republicans: 0,
+            Democrats: 0,
+            Other: 0,
+            matched: 0,
+            unmatched: 0,
+            all_recipients: 0,
+            recipients: {}
+        };
+        txdata.recipient_ids = {};
+        for (var i = 0; i < txdata.txs.length; i++) {
+            var tx = txdata.txs[i];
+            if (tx.amount < 0) {
+                if (tx.corp) {
+                    txdata.totals.Republicans += tx.party_breakdown.Republicans;
+                    txdata.totals.Democrats += tx.party_breakdown.Democrats;
+                    txdata.totals.Other += tx.party_breakdown.Other;
+                    txdata.totals.matched += tx.amount;
+                    for (var j = 0; j < tx.corp.recipients.length; j++) {
+                        var recipient = tx.corp.recipients[j];
+                        if (txdata.totals.recipients[recipient.name] == undefined) {
+                            txdata.totals.recipients[recipient.name] = 0;
+                        }
+                        var val = parseFloat(recipient.total_amount);
+                        txdata.totals.recipients[recipient.name] += val;
+                        txdata.totals.all_recipients += val;
+                        txdata.recipient_ids[recipient.name] = recipient.id;
+                    }
+                } else {
+                    txdata.totals.unmatched += tx.amount
+                }
+            }
         }
     },
     buildTxRow: function(tx) {
+        var amountClass = (tx.amount > 0 ? "pos" : "neg");
         if (tx.corp) {
-            var tr = $(document.createElement("tr"))
-                      .attr('class', 'chutney-tx matched tx' + tx.order);
-            tr.append($(document.createElement("td"))
-                      .attr('class', 'date')
-                      .html(tx.date));
-            tr.append($(document.createElement("td"))
-                      .attr('title', tx.orig)
-                      .html(tx.name + 
-                            ": <a class='match' href='" + tx.corp.url + "'>" + 
-                                tx.corp.info.name + 
-                            "</a> " +
-                            "<span class='wrong-match'>(Is this the " +
-                                "<a href='#' onclick='chutney.removeMatch(" 
-                                          + tx.order + "); return false;'>" +
-                                    "wrong match</a>?)</span>"
-                           ));
-            tr.append($(document.createElement("td"))
-                      .attr('class', 'amount ' + (tx.amount > 0 ? "pos" : "neg"))
-                      .html(floatToDollars(tx.amount)));
-
-            var tx_breakdown_div = $(document.createElement("div"))
-                                    .attr({
-                                        'class': 'tx-party-breakdown',
-                                        'id': "partyBreakdown" + tx.order,
-                                        'rowspan': 2
-                                    });
-            tr.append($(document.createElement("td"))
-                      .attr({
-                          'class': 'party-breakdown',
-                          'rowspan': 2
-                      }).html(tx_breakdown_div));
-
-            var pb = {};
-            for (var party in tx.corp.party_breakdown) {
-                pb[party] = parseFloat(tx.corp.party_breakdown[party][1]);
-            }
-            if (tx.amount < 0) {
-                chutney.postLoadQueue.push(function() {
-                    minipie(tx_breakdown_div.attr('id'), pb, "party");
-                });
-            }
-            
             var issues = "Issues: " + tx.corp.issues_lobbied_for.join(", ");
             issues = issues.substring(0, 130) + 
                 (issues.length > 100 ? "<a href='" + tx.corp.url + "'>...</a> &nbsp;" : "");
@@ -399,26 +381,52 @@ var chutney = {
                     tx.corp.recipients[i].name + "</a>");
             }
             issues += recipient_links.join(", ");
+            var partyBreakdownId = "partyBreakdown" + tx.order;
+            if (true) { //tx.amount < 0) {
+                var pb = {};
+                for (var party in tx.corp.party_breakdown) {
+                    pb[party] = parseFloat(tx.corp.party_breakdown[party][1]);
+                }
+                chutney.postLoadQueue.push(function() {
+                    minipie(partyBreakdownId, pb, "party");
+                });
+            }
 
-            var tr2 = $(document.createElement("tr"))
-                .attr('class', 'chutney-issues tx' + tx.order)
-                .append($(document.createElement("td"))
-                        .attr({'colspan': 2})
-                        .html(issues));
-            return [tr, tr2];
+            out = "<tr class='chutney-tx matched " + tx.mappingId + " order" + tx.order + "'>" +
+                    "<td class='date'>" + tx.date + "</td>" +
+                    "<td title='" + tx.orig + "'>" + tx.name + ": " +
+                        "<a class='match' href='" + tx.corp.url + "'>" + tx.corp.info.name + "</a>" +
+                        "<span class='wrong-match'>(Is this the " +
+                            "<a href='#' onclick='chutney.removeMatch(\"" + 
+                                          tx.mappingId  + "\"); return false;'>wrong match</a>?)" +
+                        "</span>" +
+                    "</td>" +
+                    "<td class='amount " + amountClass + "'>" + tx.amount + "</td>" +
+                    "<td class='party-breakdown' rowspan='2'>" +
+                        "<div class='tx-party-breakdown' id='" + partyBreakdownId + "'></div>" +
+                    "</td>" +
+                "</tr>" +
+                "<tr class='chutney-issues " + tx.mappingId + "'>" +
+                    "<td colspan='2'>" + issues + "</td>" +
+                "</tr>";
         } else {
-            return [$(document.createElement("tr")).attr('class', 'chutney-tx unmatched tx' + tx.order)
-                .append($(document.createElement("td"))
-                        .attr('class', 'date')
-                        .html(tx.date))
-                .append($(document.createElement("td"))
-                        .attr({'class': 'orig', 'title': tx.orig})
-                        .html(tx.name))
-                .append($(document.createElement("td"))
-                        .attr('class', 'amount ' + (tx.amount > 0 ? "pos" : "neg"))
-                        .html(floatToDollars(tx.amount)))
-                .data('order', tx.order)];
+            out = "<tr class='chutney-tx unmatched " + tx.mappingId + " order" + tx.order + "'>" +
+                        "<td class='date'>" + tx.date + "</td>" + 
+                        "<td class='orig' title='" + tx.orig + "'>" + tx.name + "</td>" +
+                        "<td class='add'>" +
+                            "<form class='chutney-add' action='' onsubmit='chutney.addMatch(" + 
+                                                            tx.order + "); return false;'>" +
+                                "<label for='name'>Match</label>" +
+                                "<input type='text' name='name' />" +
+                                "<input type='submit' value='Add' />" +
+                            "</form>" +
+                            "<span class='loading' style='display: none;'>" + spinner + "</span>" +
+                            "<div class='error'></div>" +
+                        "</td>" +
+                        "<td class='amount " + amountClass + "'>" + floatToDollars(tx.amount) + "</td>" +
+                   "</tr>";
         }
+        return out;
     },
     drawTxs: function() {
         var matched = $(document.createElement("table"))
@@ -444,6 +452,7 @@ var chutney = {
             'Democrats': Math.abs(Math.round(chutney.txdata.totals.Democrats)),
             'Other': Math.abs(Math.round(chutney.txdata.totals.Other))
         };
+        $("#totalPartyBreakdown").html("");
         piechart("totalPartyBreakdown", partyBreakdown, "party");
         
         var recipientData = [];
@@ -458,6 +467,7 @@ var chutney = {
             return b.value - a.value;
         });
         recipientData = recipientData.splice(0, 10);
+        $("#recipientTotals").html("");
         barchart("recipientTotals", recipientData);
         var total = Math.abs(chutney.txdata.totals.matched) + Math.abs(chutney.txdata.totals.unmatched);
         $("#matchedPercentage").html(
