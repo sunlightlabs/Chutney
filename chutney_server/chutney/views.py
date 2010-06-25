@@ -27,21 +27,8 @@ class Api(object):
             params.update({'limit': limit})
         params.update({'cycle': cycle, 'apikey': settings.API_KEY})
 
-        results = None
-        exception = None
-        for i in range(self.retries):
-            try:
-                response = self.pool.get_url(path, params)
-                results = simplejson.loads(response.data)
-                break
-            except urllib3.TimeoutError, e:
-                print "Retrying", path, "...."
-                exception = e
-                continue
-            except urllib3.MaxRetryError, e:
-                raise
-        else:
-            raise exception or Exception("No results.")
+        response = self.pool.get_url(path, params)
+        results = simplejson.loads(response.data)
 
         return self.remove_unicode(results)
 
@@ -53,6 +40,7 @@ class Api(object):
         career = results['totals'].keys()
         career.sort()
         results['career'] = {'start': career[1], 'end': career[-1]}
+        return results
 
     def org_party_breakdown(self, entity_id, cycle=None):
         return self.get_url_json('aggregates/org/%s/recipients/party_breakdown.json' % entity_id, cycle)
@@ -83,42 +71,54 @@ class Api(object):
             return str(data)
         return data
 
-def get_search_results(request):
-    query = request.GET.get('q', '').split(',')
-    results = {}
-    api = Api()
-    for term in query:
-        org = corp_matcher.find_match(term)
-        if not org:
-            continue
-
-        # get entity id...  TODO: include entity ID in our local DB.
-        entity_results = [r for r in api.entity_search(org) if r['id']]
-
-        for res in entity_results:
-            if corp_matcher.clean(res['name']) == corp_matcher.clean(org):
-                entity = res
-                break
-        else:
-            continue
-
-        id_ = entity['id']
-        party_breakdown = api.org_party_breakdown(id_)
-        issues_lobbied_for = [a['issue'] for a in api.org_issues(id_)]
-        recipients = api.org_recipients(id_)
-
-        results[term] = {
-            'info': entity,
-            'party_breakdown': party_breakdown,
-            'issues_lobbied_for': issues_lobbied_for,
-            'recipients': recipients,
-        }
-    return results
-
-def search(request):
+def _json_response(request, obj):
+    json = simplejson.dumps(obj, indent=4)
+    # add padding for jsonp if needed
     callback = request.GET.get('callback', None)
-    json = simplejson.dumps({'results': get_search_results(request)}, indent=4)
     if callback:
         result = "%s(%s);" % (callback, json)
+    else:
+        result = json
     return HttpResponse(result)
 
+def search(request):
+    api = Api()
+    org_id = request.GET.get('id', None)
+    if org_id:
+        entity = api.entity_metadata(org_id)
+        entity['query'] = org_id
+        entities = [entity]
+    else:
+        query = request.GET.get('q', '').split(',')
+        entities = []
+        for term in query:
+            org = corp_matcher.find_match(term)
+            if not org: 
+                continue
+            entity_results = api.entity_search(org)
+            for res in entity_results:
+                if res['id'] and corp_matcher.clean(res['name']) == corp_matcher.clean(org):
+                    res['query'] = term
+                    entities.append(res)
+                    break
+
+    results = {}
+    for entity in entities:
+        id_ = entity['id']
+        results[entity['query']] = {
+            'info': entity,
+            'party_breakdown': api.org_party_breakdown(id_),
+            'issues_lobbied_for': [a['issue'] for a in api.org_issues(id_)],
+            'recipients': api.org_recipients(id_),
+        }
+    return _json_response(request, results)
+
+def name_search(request):
+    term = request.GET.get('term', "")
+    clean_term = corp_matcher.clean(term)
+    orgs = []
+    if len(clean_term) > 1:
+        for name in corp_matcher.corps.keys():
+            if clean_term in name:
+                orgs.append(corp_matcher.corps[name])
+    return _json_response(request, orgs)

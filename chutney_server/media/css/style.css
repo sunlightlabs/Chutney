@@ -94,16 +94,24 @@
   width: 70px;
   height: 60px;
 }
-/* line 75, ././style.sass */
+/* line 76, ././style.sass */
+#chutney table.chutney-txs tr.unmatched form {
+  visibility: hidden;
+}
+/* line 79, ././style.sass */
+#chutney table.chutney-txs tr.unmatched:hover form {
+  visibility: visible;
+}
+/* line 83, ././style.sass */
 #chutney table.chutney-txs .match {
   font-weight: bold;
 }
-/* line 77, ././style.sass */
+/* line 85, ././style.sass */
 #chutney table.chutney-txs .chutney-issues, #chutney table.chutney-txs .chutney-issues a, #chutney table.chutney-txs .chutney-issues a:visited {
   color: #999999;
   font-size: smaller;
 }
-/* line 81, ././style.sass */
+/* line 89, ././style.sass */
 #chutney .totals {
   overflow: hidden;
   display: inline-block;
@@ -112,13 +120,13 @@
 #chutney .totals {
   display: block;
 }
-/* line 84, ././style.sass */
+/* line 92, ././style.sass */
 #chutney .totals .total-party-breakdown {
   width: 270px;
   height: 150px;
   float: left;
 }
-/* line 89, ././style.sass */
+/* line 97, ././style.sass */
 #chutney .totals .recipient-totals {
   width: 630px;
   height: 200px;

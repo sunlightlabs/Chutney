@@ -74,13 +74,13 @@ class CorpMatcher(object):
 
 
     def _get_corps(self):
-        corps = []
+        corps = {}
         with open(self.TOP_10000_PATH) as fh:
             reader = csv.reader(fh, delimiter="\t")
             for row in itertools.islice(reader, 1, None):
                 corp = row[3] or row[1]
-                corps.append(self.clean(corp))
-        self.corps = set(corps)
+                corps[self.clean(corp)] = corp
+        self.corps = corps
 
     def _count_corp_words(self):
         self.matches = {}

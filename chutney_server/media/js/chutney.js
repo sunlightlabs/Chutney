@@ -1,12 +1,11 @@
 (function() {
+if (typeof window.console == "undefined") { console = { log: function() {} }; }
+console.log("Chutney being read");
 
 var BRISKET_URL = "http://brisket.transparencydata.com";
 var SERVER_URL = "http://localhost:8000";
 var MEDIA_URL = SERVER_URL + "/media";
 
-if (typeof window.console == "undefined") { console = { log: function() {} }; }
-console.log("Chutney being read");
-var scriptsInserted = false;
 var stylesheets = [
     "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css",
     SERVER_URL + "/media/css/style.css"
@@ -22,12 +21,19 @@ var scripts = [
     "http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js",
     "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"
 ];
-var $;
 var spinner = "<img src='" + MEDIA_URL + "/img/spinner.gif' alt='spinner' />";
+var scriptsInserted = false;
+var $;
 
 /**
  * Util
  **/
+function recipientUrl(recipient) {
+    return BRISKET_URL + "/politician/" + slugify(recipient.name) + "/" + recipient.id;
+}
+function organizationUrl(org) {
+    return BRISKET_URL + "/organization/" + slugify(org.name) + "/" + org.id;
+}
 
 function dollarsToFloat(dollars) {
     // WATCHOUT: unicode version of &ndash; here.
@@ -44,7 +50,6 @@ function floatToDollars(float) {
     }
     return stub + Math.abs(float).toFixed(2);
 }
-
 // Largely copied from brisket_charts.js "piechart" implementation
 function minipie(div, data, type) {
     var r = Raphael(div);
@@ -98,17 +103,9 @@ function minipie(div, data, type) {
         lbl.hide();
     });
 }
-
 function slugify(string) {
     return string.trim().toLowerCase().replace(/[^-a-z0-9]/g, '-');
 }
-/*
-*  Return the brisket URL for a politician given as {id: "...id...", name: "...name..."}
-*/
-function recipientUrl(recipient) {
-    return BRISKET_URL + "/politician/" + slugify(recipient.name) + "/" + recipient.id;
-}
-
 
 /*
 * Public namespace for chutney methods
@@ -157,8 +154,13 @@ var chutney = {
             chutney.recipe();
         }
     },
-    recipes: ["&frac12; cup fresh mint", "a bunch of fresh cilantro", "1 green chile (crushed)", 
-        "1&frac12; tablespoons of onion", "3 tablespoons lemon", "salt", "blend&hellip;"],
+    recipes: ["chopping &frac12; cup fresh mint&hellip;", 
+        "adding a bunch of fresh cilantro&hellip;", 
+        "crushing in 1 green chile&hellip;", 
+        "1&frac12; tablespoons of onion&hellip;", 
+        "3 tablespoons lemon&hellip;", 
+        "salt&hellip;", 
+        "blending&hellip;"],
     recipe: function() {
         if (chutney.recipeDone) {
             return;
@@ -254,19 +256,18 @@ var chutney = {
 
     },
     /*
-    *  Callback for corporation match and brisket queries.  Store data, then display.
+    *  Callback for tx api queries.  Store data, then display.
     */
     handleCorps: function(data) {
         var txdata = chutney.txdata;
         txdata.matched = [];
         txdata.unmatched = [];
-        txdata.corps = data.results;
+        txdata.corps = data;
         for (var i = 0; i < chutney.txdata.txs.length; i++) {
             var tx = txdata.txs[i];
             if (txdata.corps[tx.name] != undefined) {
                 tx.corp = chutney.txdata.corps[tx.name];
-                tx.corp.url = BRISKET_URL + "/organization/" + slugify(tx.corp.info.name) + 
-                    "/" + tx.corp.info.id;
+                tx.corp.url = organizationUrl(tx.corp.info);
                 if (tx.amount < 0) {
                     var pb = tx.corp.party_breakdown;
                     r = pb.Republicans != undefined ? parseFloat(pb.Republicans[1]) : 0;
@@ -329,8 +330,8 @@ var chutney = {
         chutney.calculateTotals();
         chutney.drawTotals();
     },
-    addMatch: function(tx_order) {
-        console.log(tx_order);
+    addMatch: function(orig, match) {
+        console.log(orig, match);
     },
     calculateTotals: function() {
         var txdata = chutney.txdata;
@@ -417,8 +418,7 @@ var chutney = {
                             "<form class='chutney-add' action='' onsubmit='chutney.addMatch(" + 
                                                             tx.order + "); return false;'>" +
                                 "<label for='name'>Match</label>" +
-                                "<input type='text' name='name' />" +
-                                "<input type='submit' value='Add' />" +
+                                "<input type='text' name='name' class='add-name' />" +
                             "</form>" +
                             "<span class='loading' style='display: none;'>" + spinner + "</span>" +
                             "<div class='error'></div>" +
@@ -445,6 +445,27 @@ var chutney = {
         }
         $("#chutneyMatched").html(matched);
         $("#chutneyUnmatched").html(unmatched);
+
+        $("#chutney tr.unmatched").bind({
+            "mouseover": function() {
+                $(this).find("form.chutney-add").css("visibility", "visible");
+            },
+            "mouseout": function() {
+                var form = $(this).find("form.chutney-add");
+                if (!$(form).find("input.add-name").val()) {
+                    $(form).css("visibility", "hidden");
+                }
+            }
+        });
+        
+        $("#chutneyUnmatched .chutney-add input.add-name").autocomplete({
+            source: SERVER_URL + "/names.json?callback=?",
+            select: function(event, ui) {
+                var orig = $(this).parents("tr").find("td.orig").text();
+                chutney.addMatch(orig, ui.item.value);
+            },
+        });
+
     },
     drawTotals: function() {
         var partyBreakdown = {
