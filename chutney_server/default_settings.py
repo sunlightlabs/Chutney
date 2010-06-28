@@ -87,3 +87,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     'chutney',
 )
+CACHE_BACKEND = "locmem://"
+CACHE_TIMEOUT = 1000000000
+CACHE_PREFIX = "chutney"

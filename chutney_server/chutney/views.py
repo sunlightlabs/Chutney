@@ -2,10 +2,24 @@
 from django.utils import simplejson
 from django.http import HttpResponse
 from django.conf import settings
+from django.core.cache import cache
+try:
+    import hashlib
+    md5 = hashlib.md5
+except ImportError:
+    # for Python << 2.5
+    import md5 as md5_lib
+    md5 = md5_lib.new()
 
 from chutney.models import corp_matcher
 
 import urllib3
+import logging
+class NullHandler(logging.Handler):
+    def emit(self, record):
+        pass
+logging.getLogger("urllib3.connectionpool").addHandler(NullHandler())
+
 from urlparse import urlparse
 
 class Api(object):
@@ -71,8 +85,7 @@ class Api(object):
             return str(data)
         return data
 
-def _json_response(request, obj):
-    json = simplejson.dumps(obj, indent=4)
+def _json_response(request, json):
     # add padding for jsonp if needed
     callback = request.GET.get('callback', None)
     if callback:
@@ -84,6 +97,15 @@ def _json_response(request, obj):
 def search(request):
     api = Api()
     org_id = request.GET.get('id', None)
+
+    key = md5("/".join((settings.CACHE_PREFIX, 
+        "search.json", 
+        request.GET.get('q') or ""))).hexdigest()
+    cached = cache.get(key)
+    if cached is not None and (not request.GET.has_key('nocache')):
+        print "Serving from cache"
+        return _json_response(request, cached)
+
     if org_id:
         entity = api.entity_metadata(org_id)
         entity['query'] = org_id
@@ -111,14 +133,18 @@ def search(request):
             'issues_lobbied_for': [a['issue'] for a in api.org_issues(id_)],
             'recipients': api.org_recipients(id_),
         }
-    return _json_response(request, results)
+    json = simplejson.dumps(results)
+    cache.set(key, json, settings.CACHE_TIMEOUT)
+    return _json_response(request, json)
 
 def name_search(request):
     term = request.GET.get('term', "")
-    clean_term = corp_matcher.clean(term)
+    clean_terms = corp_matcher.clean(term).split()
     orgs = []
-    if len(clean_term) > 1:
-        for name in corp_matcher.corps.keys():
-            if clean_term in name:
-                orgs.append(corp_matcher.corps[name])
-    return _json_response(request, orgs)
+    for name in corp_matcher.corps.keys():
+        for term in clean_terms:
+            if term not in name:
+                break
+        else:
+            orgs.append(corp_matcher.corps[name])
+    return _json_response(request, simplejson.dumps(orgs))

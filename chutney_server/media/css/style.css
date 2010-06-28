@@ -102,16 +102,20 @@
 #chutney table.chutney-txs tr.unmatched:hover form {
   visibility: visible;
 }
-/* line 83, ././style.sass */
+/* line 81, ././style.sass */
+#chutney table.chutney-txs tr.unmatched .bad-name {
+  background-color: pink;
+}
+/* line 85, ././style.sass */
 #chutney table.chutney-txs .match {
   font-weight: bold;
 }
-/* line 85, ././style.sass */
+/* line 87, ././style.sass */
 #chutney table.chutney-txs .chutney-issues, #chutney table.chutney-txs .chutney-issues a, #chutney table.chutney-txs .chutney-issues a:visited {
   color: #999999;
   font-size: smaller;
 }
-/* line 89, ././style.sass */
+/* line 91, ././style.sass */
 #chutney .totals {
   overflow: hidden;
   display: inline-block;
@@ -120,13 +124,13 @@
 #chutney .totals {
   display: block;
 }
-/* line 92, ././style.sass */
+/* line 94, ././style.sass */
 #chutney .totals .total-party-breakdown {
   width: 270px;
   height: 150px;
   float: left;
 }
-/* line 97, ././style.sass */
+/* line 99, ././style.sass */
 #chutney .totals .recipient-totals {
   width: 630px;
   height: 200px;
