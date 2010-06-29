@@ -43,14 +43,13 @@ class CorpMatcher(object):
             "GOOGLE": "Google Inc",
     }
 
-
     def __init__(self):
         self._get_corps()
         self._count_corp_words()
 
     @classmethod
     def clean(cls, string):
-        string = re.sub("[^A-Z0-9 ]", " ", string.upper())
+        string = re.sub("[^A-Z0-9 /\.]", " ", string.upper())
         return re.sub("\s\s+", " ", string.strip())
 
     @classmethod

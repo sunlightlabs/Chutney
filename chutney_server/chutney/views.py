@@ -90,9 +90,11 @@ def _json_response(request, json):
     callback = request.GET.get('callback', None)
     if callback:
         result = "%s(%s);" % (callback, json)
+        content_type = "text/javascript"
     else:
         result = json
-    return HttpResponse(result)
+        content_type = "application/json"
+    return HttpResponse(result, content_type=content_type)
 
 def search(request):
     api = Api()
@@ -112,9 +114,11 @@ def search(request):
         entities = [entity]
     else:
         query = request.GET.get('q', '').split(',')
+        print query
         entities = []
         for term in query:
             org = corp_matcher.find_match(term)
+            print org
             if not org: 
                 continue
             entity_results = api.entity_search(org)
@@ -123,6 +127,7 @@ def search(request):
                     res['query'] = term
                     entities.append(res)
                     break
+        print entities
 
     results = {}
     for entity in entities:

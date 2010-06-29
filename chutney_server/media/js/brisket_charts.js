@@ -23,13 +23,13 @@ function piechart(div, data, type) {
         var percent = Math.round((value / total) * 100);
         var label = (key || ' ') + ' (' + percent + '%)';
         if (label.length > 1) {
-            label = label[0].toUpperCase() + label.substr(1, label.length);
+            label = label.substr(0, 1).toUpperCase() + label.substr(1, label.length);
         }
 
         slices.push({
             value: value,
             label: label,
-            color: color,
+            color: color
         });
 
     }
@@ -46,7 +46,7 @@ function piechart(div, data, type) {
         legend: labels,
         legendpos: "east",
         colors: colors,
-        strokewidth: 0,
+        strokewidth: 0
     });
 
     var lbl = undefined;

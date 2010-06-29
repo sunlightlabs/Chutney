@@ -6,6 +6,8 @@ var BRISKET_URL = "http://brisket.transparencydata.com";
 var SERVER_URL = "http://localhost:8000";
 var MEDIA_URL = SERVER_URL + "/media";
 var INFO_SEARCH_URL = SERVER_URL + "/search.json"
+var NAME_SEARCH_URL = SERVER_URL + "/names.json"
+var API_TIMEOUT = 15000; // milliseconds
 
 var stylesheets = [
     "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css",
@@ -18,18 +20,18 @@ var scripts = [
     MEDIA_URL + "/js/g.bar.jeremi.js",
     MEDIA_URL + "/js/brisket_charts.js",
     MEDIA_URL + "/js/underscore-1.0.4.js",
-
     "http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js",
+    //MEDIA_URL + "/jquery-ui.js"
     "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"
 ];
-
 var COOKIE_NAME = "chutney";
 var COOKIE_DAYS = 365;
+
 var spinner = "<img src='" + MEDIA_URL + "/img/spinner.gif' alt='spinner' />";
 var scriptsInserted = false;
 var $;
 
-/**
+/**********************************************************
  * Util
  **/
 function recipientUrl(recipient) {
@@ -46,13 +48,27 @@ function dollarsToFloat(dollars) {
     return parseFloat(dollars);
 }
 function floatToDollars(float) {
-    var stub;
+    var prefix;
     if (float < 0) {
-        stub = "&ndash;$";
+        prefix = "&ndash;$";
     } else {
-        stub = "$";
+        prefix = "$";
     }
-    return stub + Math.abs(float).toFixed(2);
+    return prefix + Math.abs(float).toFixed(2);
+}
+function slugify(string) {
+    return string.trim().toLowerCase().replace(/[^-a-z0-9]/g, '-');
+}
+function clean(string) {
+    // normalize to all upper-case, symbols replaced with spaces, multi-spaces
+    // replaced with single spaces.
+    return string.toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
+}
+// IE lacks "trim"
+if (typeof String.trim === "undefined") {
+    String.prototype.trim = function () {
+        return this.replace(/^\s*/, "").replace(/\s*$/, "");
+    }
 }
 // Largely copied from brisket_charts.js "piechart" implementation
 function minipie(div, data, type) {
@@ -107,20 +123,64 @@ function minipie(div, data, type) {
         lbl.hide();
     });
 }
-function slugify(string) {
-    return string.trim().toLowerCase().replace(/[^-a-z0-9]/g, '-');
-}
-function clean(string) {
-    return string.toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()
+function mappingIdFor(corp, name) {
+    return (corp ? corp.info.id : "unmatched") + slugify(name);
 }
 
-/*
+// functionized so we can load this after jQuery is loaded.
+function loadJQueryCookie() {
+    // taken from jQuery cookie plugin v1.0:
+    // http://plugins.jquery.com/project/cookie
+    jQuery.cookie = function(name, value, options) {
+        if (typeof value != 'undefined') { // name and value given, set cookie
+            options = options || {};
+            if (value === null) {
+                value = '';
+                options.expires = -1;
+            }
+            var expires = '';
+            if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
+                var date;
+                if (typeof options.expires == 'number') {
+                    date = new Date();
+                    date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
+                } else {
+                    date = options.expires;
+                }
+                expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
+            }
+            // CAUTION: Needed to parenthesize options.path and options.domain
+            // in the following expressions, otherwise they evaluate to undefined
+            // in the packed version for some reason...
+            var path = options.path ? '; path=' + (options.path) : '';
+            var domain = options.domain ? '; domain=' + (options.domain) : '';
+            var secure = options.secure ? '; secure' : '';
+            document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
+        } else { // only name given, get cookie
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    };
+}
+
+/***************************************************************
 * Transaction objects
 */
 var TxPrototype = {
     setCorp: function(corp) {
         this.corp = corp;
-        if (typeof corp !== "undefined") {
+        if (corp != undefined) {
             var pb = this.corp.party_breakdown;
             r = pb.Republicans != undefined ? parseFloat(pb.Republicans[1]) : 0;
             d = pb.Democrats != undefined ? parseFloat(pb.Democrats[1]) : 0;
@@ -132,11 +192,11 @@ var TxPrototype = {
                 'Other': this.amount * (o / total)
             };
         } else {
-            this.party_breakdown = undefined;
+            delete this.party_breakdown;
         }
     },
     getMappingId: function() {
-        return (this.corp ? this.corp.info.id : "unmatched") + slugify(this.name);
+        return mappingIdFor(this.corp, this.name);
     },
     getCorpUrl: function() {
         if (!this.corp) {
@@ -162,7 +222,7 @@ function Tx(name, amount, date, orig, order) {
 }
 Tx.prototype = TxPrototype;
 
-/*
+/************************************************************************
 * Public namespace for chutney methods
 */
 var chutney = {
@@ -172,10 +232,11 @@ var chutney = {
     start: function() {
         if (window.location.protocol + "//" + window.location.host == SERVER_URL) {
             // early out if we are at the page where the bookmarklet is
-            // acquired.  Perhaps display instructions instead?
-            return;
+            // acquired.  Perhaps display instructions for using bookmarklet
+            // instead?
+            //return;
         }
-        if (typeof window.jQuery == 'undefined') {
+        if (typeof window.jQuery === 'undefined') {
             if (!scriptsInserted) {
                 var head = document.getElementsByTagName("head")[0];
                 for (var i = 0; i < scripts.length; i++) {
@@ -195,26 +256,21 @@ var chutney = {
             }
             console.log("no jquery");
             setTimeout("chutney.start()", 50);
-        } else if (typeof window.jQuery.ui == 'undefined') {
+        } else if (typeof window.jQuery.ui === 'undefined') {
             console.log("no jquery-ui");
             setTimeout("chutney.start()", 50);
+        } else if (typeof window.Raphael === 'undefined') {
+            console.log("no raphael");
+            setTimeout("chutney.start()", 50);
         } else {
+            console.log("Chutney run!");
             jQuery.noConflict();
             $ = jQuery;
             loadJQueryCookie();
-            console.log("Chutney run!");
             chutney.setUp();
             // Funny scroll positions mess up modal dialog.
             $(window).scrollTop(0);
             chutney.div.dialog('open');
-            // intermittent off-screen placement bug
-            var offset = $(chutney.div).parents(".ui-dialog").offset();
-            if (offset.top < 0) {
-                $(chutney.div).parents(".ui-dialog").offset({
-                    top: 0,
-                    left: offset.left
-                });
-            }
             chutney.parseTransactions();
             chutney.queryApi();
             chutney.recipe();
@@ -228,12 +284,21 @@ var chutney = {
         "salt&hellip;", 
         "blending&hellip;"],
     recipe: function() {
-        if (chutney.recipeDone) {
-            return;
+        // intermittent off-screen placement bug
+        var offset = $(chutney.div).parents(".ui-dialog").offset();
+        if (offset.top < 0) {
+            $(chutney.div).parents(".ui-dialog").offset({
+                top: 0,
+                left: offset.left
+            });
         }
-        if (chutney.recipeIndex == undefined) {
+        if (chutney.recipeIndex == undefined || chutney.recipeDone) {
             chutney.recipeIndex = 0;
             $("#chutney .loading").html("<ul class='recipe'></ul>" + spinner);
+        }
+        if (chutney.recipeDone) {
+            chutney.recipeDone = false;
+            return;
         }
         $("#chutney .recipe").append("<li>" + chutney.recipes[chutney.recipeIndex] + "</li>");
         if (chutney.recipeIndex + 1 < chutney.recipes.length) {
@@ -303,9 +368,18 @@ var chutney = {
         }
         $.cookie(COOKIE_NAME, escaped.join(";"), { expires: COOKIE_DAYS });
     },
+    // Callback for deleting override from override UI
     removeOverride: function(override) {
-        console.log(override, chutney.overrides);
-        delete chutney.overrides[unescape(override)];
+        name = unescape(override);
+        if (chutney.overrides[name] === "") {
+            chutney.addUserMatch(name, name);
+        } else {
+            var corp = chutney.txdata.corps[chutney.overrides[name]];
+            if (corp != undefined) {
+                chutney.removeUserMatch(mappingIdFor(corp, name));
+            }
+        }
+        delete chutney.overrides[name];
         chutney.storeOverrides();
         chutney.drawOverrides();
         return false;
@@ -335,44 +409,62 @@ var chutney = {
         });
     },
     queryApi: function() {
-        var escaped = [];
+        var names = [];
         for (var name in chutney.txdata.tx_names) {
             if (chutney.overrides[name] != undefined) {
                 if (chutney.overrides[name].length > 0) {
-                    escaped.push(escape(chutney.overrides[name]));
+                    names.push(chutney.overrides[name]);
                 }
             } else {
                 if (name.length > 0) {
-                    escaped.push(escape(name));
+                    names.push(name);
                 }
             }
         }
-        var query = escaped.join(",");
-        $(window).ajaxError(function(e, xhr, settings, exception) {
-            console.log(e);
-            console.log(xhr);
-            $("#chutneyContent").html("Error communicating with server.");
-        });
         console.log("querying...");
-        $.getJSON(INFO_SEARCH_URL + "?q=" + query + "&callback=?", function(data) {
-            chutney.recipeDone = true; // stop the blending
-            var txdata = chutney.txdata;
-            txdata.matched = [];
-            txdata.unmatched = [];
-            txdata.corps = data;
-            for (var i = 0; i < chutney.txdata.txs.length; i++) {
-                var tx = txdata.txs[i];
-                if (txdata.corps[tx.getMatchName()] != undefined) {
-                    tx.setCorp(txdata.corps[tx.getMatchName()]);
-                    txdata.matched.push(tx);
-                } else {
-                    txdata.unmatched.push(tx);
+        var jsonError = setTimeout(function() {
+                chutney.recipeDone = true;
+                var div = $(document.createElement("div"));
+                div.html("Error communicating with server.");
+                div.dialog({
+                    buttons: {
+                        'Try again': function() {
+                            $(this).dialog('close');
+                            chutney.start();
+                        },
+                        'Cancel': function() {
+                            $(this).dialog('close');
+                        }
+                    },
+                    modal: true,
+                    zIndex: 10000,
+                    resizable: false,
+                    draggable: false
+                });
+            }, API_TIMEOUT);
+        $.getJSON(INFO_SEARCH_URL + "?callback=?", {'q': names.join(",") },
+            function(data) {
+                console.log("query data:", data);
+                clearTimeout(jsonError);
+                chutney.recipeDone = true; // stop the blending
+                var txdata = chutney.txdata;
+                txdata.matched = [];
+                txdata.unmatched = [];
+                txdata.corps = data;
+                for (var i = 0; i < chutney.txdata.txs.length; i++) {
+                    var tx = txdata.txs[i];
+                    if (txdata.corps[tx.getMatchName()] != undefined) {
+                        tx.setCorp(txdata.corps[tx.getMatchName()]);
+                        txdata.matched.push(tx);
+                    } else {
+                        txdata.unmatched.push(tx);
+                    }
                 }
+                chutney.calculateTotals();
+                chutney.show();
+                console.log("done.");
             }
-            chutney.calculateTotals();
-            chutney.show();
-            console.log("done.");
-        });
+        );
     },
     /*
     * Create and insert a single row into the appropriate table from the given tx.
@@ -400,7 +492,7 @@ var chutney = {
         }
         chutney.postLoadQueue = [];
     },
-    removeMatch: function(mappingId) {
+    removeUserMatch: function(mappingId) {
         $("." + mappingId).fadeOut(function() { $(this).remove(); });
         var tx;
         // Run as while loop, since we modify the array during looping and increment selectively.
@@ -424,35 +516,38 @@ var chutney = {
         chutney.drawOverrides();
         return false;
     },
-    addMatch: function(orig, newCorpName) {
+    addUserMatch: function(orig, newCorpName) {
         chutney.overrides[orig] = newCorpName;
         chutney.storeOverrides();
         chutney.drawOverrides();
         $.getJSON(INFO_SEARCH_URL + "?callback=?", {q: newCorpName},
             function(data) {
+                console.log("name match:", data);
                 var corp;
                 for (var name in data) {
                     // add first entry
                     corp = data[name];
                     break;
                 }
-                chutney.txdata.corps[newCorpName] = corp;
-                var i = 0;
-                while (i < chutney.txdata.unmatched.length) {
-                    var tx = chutney.txdata.unmatched[i];
-                    if (tx.name == orig) {
-                        // remove old row and references
-                        chutney.txdata.unmatched.splice(i, 1);
-                        $("#chutney ." + tx.uniqueClass).fadeOut(function() { $(this).remove(); });
-                        // Insert the row in 'matched'
-                        tx.setCorp(corp);
-                        chutney.insertRow(tx);
-                    } else {
-                        i++;
+                if (corp != undefined) {
+                    chutney.txdata.corps[newCorpName] = corp;
+                    var i = 0;
+                    while (i < chutney.txdata.unmatched.length) {
+                        var tx = chutney.txdata.unmatched[i];
+                        if (tx.name == orig) {
+                            // remove old row and references
+                            chutney.txdata.unmatched.splice(i, 1);
+                            $("#chutney ." + tx.uniqueClass).fadeOut(function() { $(this).remove(); });
+                            // Insert the row in 'matched'
+                            tx.setCorp(corp);
+                            chutney.insertRow(tx);
+                        } else {
+                            i++;
+                        }
                     }
+                    chutney.calculateTotals();
+                    chutney.drawTotals();
                 }
-                chutney.calculateTotals();
-                chutney.drawTotals();
             }
         );
     },
@@ -521,7 +616,7 @@ var chutney = {
                     "<td title='" + tx.orig + "'>" + tx.name + ": " +
                         "<a class='match' href='" + tx.getCorpUrl() + "'>" + tx.corp.info.name + "</a>" +
                         "<span class='wrong-match'>(Is this the " +
-                            "<a href='' onclick='return chutney.removeMatch(\"" + 
+                            "<a href='' onclick='return chutney.removeUserMatch(\"" + 
                                           tx.getMappingId()  + "\");'>wrong match</a>?)" +
                         "</span>" +
                     "</td>" +
@@ -596,14 +691,14 @@ var chutney = {
                 .addClass("ui-autocomplete-loading")
                 .autocomplete("option", "disabled", true);
             var orig = input.parents("tr").find("td.orig").text();
-            chutney.addMatch(orig, val ? val : input.val());
+            chutney.addUserMatch(orig, val ? val : input.val());
         };
         $(parentSelector).find("input.add-name").autocomplete({
             minLength: 2,
             source: function(request, responseCallback) {
                 if (request.term.length > 1) {
                     var input = $(this.element);
-                    $.getJSON(SERVER_URL + "/names.json?callback=?", request, function(data) {
+                    $.getJSON(NAME_SEARCH_URL + "?callback=?", request, function(data) {
                         responseCallback(data);
                         var cleaned = clean(request.term);
                         for (var i = 0; i < data.length; i++) {
@@ -627,7 +722,7 @@ var chutney = {
             },
             select: function(event, ui) {
                 doAddMatch(this, ui.item.value);
-            },
+            }
         }).bind({
             focus: function(event) {
                 if ($(this).hasClass("bad-name")) {
@@ -643,28 +738,8 @@ var chutney = {
         });
     },
     drawTotals: function() {
-        var partyBreakdown = {
-            'Republicans': Math.abs(Math.round(chutney.txdata.totals.Republicans)),
-            'Democrats': Math.abs(Math.round(chutney.txdata.totals.Democrats)),
-            'Other': Math.abs(Math.round(chutney.txdata.totals.Other))
-        };
         $("#totalPartyBreakdown").html("");
-        piechart("totalPartyBreakdown", partyBreakdown, "party");
-        
-        var recipientData = [];
-        var ratio = Math.abs(chutney.txdata.totals.matched / chutney.txdata.totals.all_recipients);
-        for (var name in chutney.txdata.totals.recipients) {
-            recipientData.push({
-                key: name.substring(0, 27) + (name.length > 27 ? "..." : ""),
-                value: Math.round(chutney.txdata.totals.recipients[name] * ratio),
-                href: recipientUrl({name: name, id: chutney.txdata.recipient_ids[name]})            });
-        }
-        recipientData.sort(function(a, b) {
-            return b.value - a.value;
-        });
-        recipientData = recipientData.splice(0, 10);
         $("#recipientTotals").html("");
-        barchart("recipientTotals", recipientData);
         var total = Math.abs(chutney.txdata.totals.matched) + Math.abs(chutney.txdata.totals.unmatched);
         $("#matchedPercentage").html(
             Math.abs(Math.round((chutney.txdata.totals.matched / total) * 100))
@@ -672,6 +747,32 @@ var chutney = {
         $("#unmatchedPercentage").html(
             Math.abs(Math.round((chutney.txdata.totals.unmatched / total) * 100))
         );
+        if (chutney.txdata.matched.length == 0) {
+            $('#totalPartyBreakdown').html(
+                "Sorry, we couldn't match any of your transactions.  You can" +
+                " manually match them below.");
+        } else {
+            var partyBreakdown = {
+                'Republicans': Math.abs(Math.round(chutney.txdata.totals.Republicans)),
+                'Democrats': Math.abs(Math.round(chutney.txdata.totals.Democrats)),
+                'Other': Math.abs(Math.round(chutney.txdata.totals.Other))
+            };
+            piechart("totalPartyBreakdown", partyBreakdown, "party");
+            
+            var recipientData = [];
+            var ratio = Math.abs(chutney.txdata.totals.matched / chutney.txdata.totals.all_recipients);
+            for (var name in chutney.txdata.totals.recipients) {
+                recipientData.push({
+                    key: name.substring(0, 27) + (name.length > 27 ? "..." : ""),
+                    value: Math.round(chutney.txdata.totals.recipients[name] * ratio),
+                    href: recipientUrl({name: name, id: chutney.txdata.recipient_ids[name]})            });
+            }
+            recipientData.sort(function(a, b) {
+                return b.value - a.value;
+            });
+            recipientData = recipientData.splice(0, 10);
+            barchart("recipientTotals", recipientData);
+        }
     },
     drawOverrides: function() {
         $("#chutneyOverrides").html("");
@@ -698,7 +799,7 @@ var chutney = {
                         ))
                         .append($(document.createElement("td")).html(
                             "<a href='#' onclick='return chutney.removeOverride(\"" + 
-                                escape(ovrArray[i][1]) + "\");'>x</a>"))
+                                escape(ovrArray[i][0]) + "\");'>x</a>"))
                 );
             }
             $("#chutneyOverrides").append("<h2>Custom matches</h2>");
@@ -721,53 +822,6 @@ var chutney = {
         chutney.postLoadQueue = [];
         chutney.drawOverrides();
     }
-}
-
-// functionized so we can load this after jQuery is loaded.
-function loadJQueryCookie() {
-    // taken from jQuery cookie plugin v1.0:
-    // http://plugins.jquery.com/project/cookie
-    jQuery.cookie = function(name, value, options) {
-        if (typeof value != 'undefined') { // name and value given, set cookie
-            options = options || {};
-            if (value === null) {
-                value = '';
-                options.expires = -1;
-            }
-            var expires = '';
-            if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
-                var date;
-                if (typeof options.expires == 'number') {
-                    date = new Date();
-                    date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-                } else {
-                    date = options.expires;
-                }
-                expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
-            }
-            // CAUTION: Needed to parenthesize options.path and options.domain
-            // in the following expressions, otherwise they evaluate to undefined
-            // in the packed version for some reason...
-            var path = options.path ? '; path=' + (options.path) : '';
-            var domain = options.domain ? '; domain=' + (options.domain) : '';
-            var secure = options.secure ? '; secure' : '';
-            document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
-        } else { // only name given, get cookie
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    };
 }
 
 window.chutney = chutney;
