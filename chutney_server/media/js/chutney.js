@@ -1,39 +1,30 @@
+jQuery.noConflict();
+if (typeof window.console == "undefined") { window.console = { log: function() {} }; }
 (function() {
-if (typeof window.console == "undefined") { console = { log: function() {} }; }
-console.log("Chutney being read");
+var $ = jQuery;
 
 var BRISKET_URL = "http://brisket.transparencydata.com";
+//var SERVER_URL = "http://10.13.34.222:8000";
 var SERVER_URL = "http://localhost:8000";
 var MEDIA_URL = SERVER_URL + "/media";
 var INFO_SEARCH_URL = SERVER_URL + "/search.json"
+var INFO_MATCH_URL = SERVER_URL + "/match.json"
 var NAME_SEARCH_URL = SERVER_URL + "/names.json"
-var API_TIMEOUT = 15000; // milliseconds
+var API_TIMEOUT = 30 * 1000; // milliseconds
 
 var stylesheets = [
     "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css",
     SERVER_URL + "/media/css/style.css"
-];
-var scripts = [
-    MEDIA_URL + "/js/raphael.js",
-    MEDIA_URL + "/js/g.raphael-min.js",
-    MEDIA_URL + "/js/g.pie.patched.js",
-    MEDIA_URL + "/js/g.bar.jeremi.js",
-    MEDIA_URL + "/js/brisket_charts.js",
-    MEDIA_URL + "/js/underscore-1.0.4.js",
-    "http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js",
-    //MEDIA_URL + "/jquery-ui.js"
-    "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"
 ];
 var COOKIE_NAME = "chutney";
 var COOKIE_DAYS = 365;
 
 var spinner = "<img src='" + MEDIA_URL + "/img/spinner.gif' alt='spinner' />";
 var scriptsInserted = false;
-var $;
 
 /**********************************************************
  * Util
- **/
+ **********************************************************/
 function recipientUrl(recipient) {
     return BRISKET_URL + "/politician/" + slugify(recipient.name) + "/" + recipient.id;
 }
@@ -127,56 +118,9 @@ function mappingIdFor(corp, name) {
     return (corp ? corp.info.id : "unmatched") + slugify(name);
 }
 
-// functionized so we can load this after jQuery is loaded.
-function loadJQueryCookie() {
-    // taken from jQuery cookie plugin v1.0:
-    // http://plugins.jquery.com/project/cookie
-    jQuery.cookie = function(name, value, options) {
-        if (typeof value != 'undefined') { // name and value given, set cookie
-            options = options || {};
-            if (value === null) {
-                value = '';
-                options.expires = -1;
-            }
-            var expires = '';
-            if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
-                var date;
-                if (typeof options.expires == 'number') {
-                    date = new Date();
-                    date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-                } else {
-                    date = options.expires;
-                }
-                expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
-            }
-            // CAUTION: Needed to parenthesize options.path and options.domain
-            // in the following expressions, otherwise they evaluate to undefined
-            // in the packed version for some reason...
-            var path = options.path ? '; path=' + (options.path) : '';
-            var domain = options.domain ? '; domain=' + (options.domain) : '';
-            var secure = options.secure ? '; secure' : '';
-            document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
-        } else { // only name given, get cookie
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-    };
-}
-
 /***************************************************************
 * Transaction objects
-*/
+****************************************************************/
 var TxPrototype = {
     setCorp: function(corp) {
         this.corp = corp;
@@ -224,7 +168,7 @@ Tx.prototype = TxPrototype;
 
 /************************************************************************
 * Public namespace for chutney methods
-*/
+*************************************************************************/
 var chutney = {
     /*
     *  Load necessary javascript and css, parse transactions, then query API.
@@ -236,44 +180,33 @@ var chutney = {
             // instead?
             //return;
         }
-        if (typeof window.jQuery === 'undefined') {
-            if (!scriptsInserted) {
-                var head = document.getElementsByTagName("head")[0];
-                for (var i = 0; i < scripts.length; i++) {
-                    var script = document.createElement("script");
-                    script.src = scripts[i];
-                    head.appendChild(script);
-                }
-                for (var i = 0; i < stylesheets.length; i++) {
-                    var css = document.createElement("link");
-                    css.rel = "stylesheet";
-                    css.type = "text/css";
-                    css.href = stylesheets[i];
-                    css.media = "all";
-                    head.appendChild(css);
-                }
-                scriptsInserted = true;
+        if (!scriptsInserted) {
+            var head = document.getElementsByTagName("head")[0];
+            for (var i = 0; i < stylesheets.length; i++) {
+                var css = document.createElement("link");
+                css.rel = "stylesheet";
+                css.type = "text/css";
+                css.href = stylesheets[i];
+                css.media = "all";
+                head.appendChild(css);
             }
-            console.log("no jquery");
-            setTimeout("chutney.start()", 50);
-        } else if (typeof window.jQuery.ui === 'undefined') {
-            console.log("no jquery-ui");
-            setTimeout("chutney.start()", 50);
-        } else if (typeof window.Raphael === 'undefined') {
-            console.log("no raphael");
-            setTimeout("chutney.start()", 50);
-        } else {
-            console.log("Chutney run!");
-            jQuery.noConflict();
-            $ = jQuery;
-            loadJQueryCookie();
-            chutney.setUp();
-            // Funny scroll positions mess up modal dialog.
-            $(window).scrollTop(0);
-            chutney.div.dialog('open');
-            chutney.parseTransactions();
-            chutney.queryApi();
-            chutney.recipe();
+            scriptsInserted = true;
+        }
+        chutney.setUp();
+        // Funny scroll positions mess up modal dialog.
+        $(window).scrollTop(0);
+        chutney.div.dialog('open');
+        chutney.parseTransactions();
+        chutney.queryApi();
+        chutney.recipe();
+    },
+    fixOffset: function () {
+        var offset = $(chutney.div).parents(".ui-dialog").offset();
+        if (offset.top < 0) {
+            $(chutney.div).parents(".ui-dialog").offset({
+                top: 0,
+                left: offset.left
+            });
         }
     },
     recipes: ["chopping &frac12; cup fresh mint&hellip;", 
@@ -284,14 +217,7 @@ var chutney = {
         "salt&hellip;", 
         "blending&hellip;"],
     recipe: function() {
-        // intermittent off-screen placement bug
-        var offset = $(chutney.div).parents(".ui-dialog").offset();
-        if (offset.top < 0) {
-            $(chutney.div).parents(".ui-dialog").offset({
-                top: 0,
-                left: offset.left
-            });
-        }
+        chutney.fixOffset();
         if (chutney.recipeIndex == undefined || chutney.recipeDone) {
             chutney.recipeIndex = 0;
             $("#chutney .loading").html("<ul class='recipe'></ul>" + spinner);
@@ -421,7 +347,6 @@ var chutney = {
                 }
             }
         }
-        console.log("querying...");
         var jsonError = setTimeout(function() {
                 chutney.recipeDone = true;
                 var div = $(document.createElement("div"));
@@ -444,7 +369,7 @@ var chutney = {
             }, API_TIMEOUT);
         $.getJSON(INFO_SEARCH_URL + "?callback=?", {'q': names.join(",") },
             function(data) {
-                console.log("query data:", data);
+                console.log("query results:", data);
                 clearTimeout(jsonError);
                 chutney.recipeDone = true; // stop the blending
                 var txdata = chutney.txdata;
@@ -462,7 +387,6 @@ var chutney = {
                 }
                 chutney.calculateTotals();
                 chutney.show();
-                console.log("done.");
             }
         );
     },
@@ -520,7 +444,7 @@ var chutney = {
         chutney.overrides[orig] = newCorpName;
         chutney.storeOverrides();
         chutney.drawOverrides();
-        $.getJSON(INFO_SEARCH_URL + "?callback=?", {q: newCorpName},
+        $.getJSON(INFO_MATCH_URL + "?callback=?", {q: newCorpName},
             function(data) {
                 console.log("name match:", data);
                 var corp;
@@ -529,6 +453,7 @@ var chutney = {
                     corp = data[name];
                     break;
                 }
+                console.log(orig, newCorpName, corp);
                 if (corp != undefined) {
                     chutney.txdata.corps[newCorpName] = corp;
                     var i = 0;
@@ -770,8 +695,7 @@ var chutney = {
             recipientData.sort(function(a, b) {
                 return b.value - a.value;
             });
-            recipientData = recipientData.splice(0, 10);
-            barchart("recipientTotals", recipientData);
+            barchart("recipientTotals", recipientData, 10);
         }
     },
     drawOverrides: function() {
@@ -825,6 +749,5 @@ var chutney = {
 }
 
 window.chutney = chutney;
-console.log("Chutney all read");
 
 })();

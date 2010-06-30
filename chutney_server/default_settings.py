@@ -39,7 +39,7 @@ USE_L10N = False
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(SETTINGS_ROOT, "media")
+MEDIA_ROOT = os.path.join(SETTINGS_ROOT, "media/")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -88,5 +88,4 @@ INSTALLED_APPS = (
     'chutney',
 )
 CACHE_BACKEND = "locmem://"
-CACHE_TIMEOUT = 1000000000
 CACHE_PREFIX = "chutney"
