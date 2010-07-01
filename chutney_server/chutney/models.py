@@ -61,6 +61,8 @@ class CorpMatcher(object):
             "COSTCO": "Costco Wholesale",
             "PAYPAL": "eBay Inc",
             "GOOGLE": "Google Inc",
+            "NETFLIX": "Netflix Inc",
+            "BKOFAMERICA": "Bank of America",
     }
 
     def __init__(self):
@@ -115,9 +117,9 @@ class CorpMatcher(object):
         Search for a single best match for the given string.  Returns None
         if either no matches or multiple matches are found.
         """
-        best_match = self.search(string)
-        if len(best_match) == 1:
-            return best_match[0]
+        matches = self.search(string)
+        if len(matches) == 1:
+            return matches[0]
         return None
 
     @classmethod
@@ -143,9 +145,6 @@ class Api(object):
     def __init__(self):
         self.api_url = urlparse(settings.AGGREGATES_API_BASE_URL)
         self.pool = urllib3.connection_from_url(settings.AGGREGATES_API_BASE_URL)
-
-    def close(self):
-        self.pool.close()
 
     def get_url_json(self, path, cycle=None, limit=None, **params):
         path = "/%s/%s" % (self.api_url.path.strip('/'), path.strip('/'))

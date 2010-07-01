@@ -1,4 +1,5 @@
 from cStringIO import StringIO
+import urllib2
 
 from django.utils import simplejson
 from django.http import HttpResponse
@@ -18,26 +19,24 @@ def _json_response(request, json):
         #content_type = "application/json"
     return HttpResponse(result, content_type=content_type)
 
-def search(request):
+def org_info(request):
     """
-    Expects a GET variable 'q' which contains a comma separated list of fuzzy
-    corporation names to search against.  Returns chutney info for the orgs
-    that are identified.
+    Expects a GET variable 'q' which contains a comma separated list of corp
+    names.  If the 'fuzzy=1' parameter is provided, treat the names as fuzzy
+    strings to search against.  Returns chutney info for the orgs that are
+    identified.
     """
     query = request.GET.get('q', '').split(',')
-    matches = []
-    for term in query:
-        org = corp_matcher.find_single_match(term)
-        if org:
-            matches.append((term, org))
-    return _json_response(request, Api().chutney_info(matches))
+    fuzzy = request.GET.get('fuzzy', '0')
+    if fuzzy == '1':
+        orgs = []
+        for term in query:
+            org = corp_matcher.find_single_match(term)
+            if org:
+                orgs.append((term, org))
+    else:
+        orgs = [(org, org) for org in query]
 
-def match(request):
-    """
-    Expects a GET variable 'q' which contains a comma separated list of exact
-    corp names.  Returns chutney info for the orgs.
-    """
-    orgs = [(org, org) for org in request.GET.get('q', '').split(',')]
     return _json_response(request, Api().chutney_info(orgs))
 
 def name_search(request):
@@ -64,22 +63,29 @@ def assemble_js(request):
     the insertions static. 
     """
     root = "%sjs/" % (settings.MEDIA_ROOT)
+    ieroot = "http://beta.influenceexplorer.com/media/js/"
+    ieroot = "/home/tc1/dc/brisket/media/js/"
     js = [
-        root + "raphael.js",
-        root + "g.raphael-min.js",
-        root + "g.pie.patched.js",
-        root + "g.bar.jeremi.js",
+        ieroot + "underscore-1.0.2.min.js",
+        ieroot + "raphael-min.js",
+        ieroot + "g.raphael-min.js",
+        ieroot + "g.pie.patched.js",
+        ieroot + "g.bar.jeremi.js",
         root + "brisket_charts.js",
-        root + "underscore-1.0.4.js",
-        root + "jquery.js",
-        root + "jquery-ui.js",
+        root + "jquery.min.js",
+        root + "jquery-ui.min.js",
         root + "jquery.cookie.js",
         root + "chutney.js",
     ]
 
     out = StringIO()
     for filename in js:
-        with open(filename) as fh:
+        print "... adding", filename
+        if filename.startswith("http"):
+            fh = urllib2.urlopen(filename)
             out.write(fh.read())
+        else:
+            with open(filename) as fh:
+                out.write(fh.read())
     return HttpResponse(out.getvalue(), content_type="text/javascript")
 

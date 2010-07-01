@@ -135,4 +135,5 @@
   width: 630px;
   height: 200px;
   float: left;
+  position: relative;
 }

@@ -3,12 +3,11 @@ if (typeof window.console == "undefined") { window.console = { log: function() {
 (function() {
 var $ = jQuery;
 
-var BRISKET_URL = "http://brisket.transparencydata.com";
+var BRISKET_URL = "http://beta.influenceexplorer.com";
 //var SERVER_URL = "http://10.13.34.222:8000";
 var SERVER_URL = "http://localhost:8000";
 var MEDIA_URL = SERVER_URL + "/media";
-var INFO_SEARCH_URL = SERVER_URL + "/search.json"
-var INFO_MATCH_URL = SERVER_URL + "/match.json"
+var INFO_SEARCH_URL = SERVER_URL + "/org_info.json"
 var NAME_SEARCH_URL = SERVER_URL + "/names.json"
 var API_TIMEOUT = 30 * 1000; // milliseconds
 
@@ -61,6 +60,54 @@ if (typeof String.trim === "undefined") {
         return this.replace(/^\s*/, "").replace(/\s*$/, "");
     }
 }
+function cleanTxName(orig) {
+    // Take a typical ugly transaction string, nand turn it into a few words
+    // that are likely to match the corporation name.
+    var string = orig;
+    
+    // 0. Early outs for things we shouldn't bother with.
+    if (string.search(/(^|\s)(TRANSFER)(?=$|\s)/gi) != -1) {
+        return null;
+    }
+    // 1. Remove HTML
+    string = string.replace(/<[\w\/]+>/g, ' ');
+
+    // 2. Replace special characters and numbers with spaces, then strip extraneous spaces.
+    string = string.replace(/[^A-Z\. ]/gi, ' ');
+   // only get rid of .'s if they aren't part of URLs
+    string = string.replace(/\.(?!(com|org|net))/gi, ' ');
+
+    // 3. Remove stop words.
+    string = string.replace(/(^|\s)(PURCHASE|DEPOSIT|CHECKCARD|AUTH|ACCT|DEP|DES|INST|XFER|ID|WWW|WITHDRWL|WITHDRAWL|ONLINE)(?=$|\s)/gi, "");
+
+    // 4. Remove extraneous whitespace.
+    string = string.trim().replace(/\s+/g, ' ');
+
+    // 5. Keep only the first couple of words, and make the cases nice.
+    var parts = string.split(' ');
+    var result = "";
+    for (var i = 0; i < parts.length && result.length < 14; i++) {
+        if (parts[i].length > 1 
+                && result.search(parts[i]) == -1
+                && parts[i].search(/^TH$/) == -1) {
+            var word;
+            if (parts[i].search(/\./) != -1 || parts[i].search(/^(of|the|in|to)$/g) != -1) {
+                // all lower case -- URLs or small words
+                word = parts[i].toLowerCase();
+            } else if (parts[i].length <= 3 && parts[i].search(/^(INC)$/g) == -1) {
+                // all upper case -- acronyms
+                word = parts[i].toUpperCase();
+            } else {
+                // initial capitals
+                word = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1).toLowerCase();
+            }
+            result += " " + word;
+        }
+    }
+    string = result.trim();
+    return string;
+}
+
 // Largely copied from brisket_charts.js "piechart" implementation
 function minipie(div, data, type) {
     var r = Raphael(div);
@@ -79,7 +126,7 @@ function minipie(div, data, type) {
         var percent = Math.round((value / total) * 100);
         var label = (key || ' ') + ' (' + percent + '%)';
         if (label.length > 1) {
-            label = label[0].toUpperCase() + label.substr(1, label.length);
+            label = label.substring(0, 1).toUpperCase() + label.substr(1, label.length);
         }
         slices.push({
             value: value,
@@ -174,12 +221,6 @@ var chutney = {
     *  Load necessary javascript and css, parse transactions, then query API.
     */
     start: function() {
-        if (window.location.protocol + "//" + window.location.host == SERVER_URL) {
-            // early out if we are at the page where the bookmarklet is
-            // acquired.  Perhaps display instructions for using bookmarklet
-            // instead?
-            //return;
-        }
         if (!scriptsInserted) {
             var head = document.getElementsByTagName("head")[0];
             for (var i = 0; i < stylesheets.length; i++) {
@@ -194,8 +235,8 @@ var chutney = {
         }
         chutney.setUp();
         // Funny scroll positions mess up modal dialog.
-        $(window).scrollTop(0);
         chutney.div.dialog('open');
+        $(window).scrollTop(0);
         chutney.parseTransactions();
         chutney.queryApi();
         chutney.recipe();
@@ -314,29 +355,58 @@ var chutney = {
     *  Pull transactions out of the current page.
     */
     parseTransactions: function() {
-        // mint.com
         chutney.txdata.txs = [];
         chutney.txdata.tx_names = {};
-        $("#transaction-list-body > tr").each(function(index) {
-            var desc = $(this).children("td[title]");
-            var name = desc.text();
-            var tx = new Tx(name,
-                dollarsToFloat($(this).children("td.money").text()),
-                $(this).children("td.date").text(),
-                desc.attr("title"),
-                index
-            );
-            chutney.txdata.txs.push(tx);
-            if (typeof chutney.txdata.tx_names[name] == "undefined") {
-                chutney.txdata.tx_names[name] = [tx];
-            } else {
-                chutney.txdata.tx_names[name].push(tx);
+        if (window.location.href.search(/mint\.com/) != -1 ||
+                window.location.href.search(/mint\.html/) != -1) {
+            // Location: mint.com
+            $("#transaction-list-body > tr").each(function(index) {
+                var description = $(this).children("td[title]");
+                chutney.txdata.txs.push(new Tx( 
+                    description.text(),
+                    dollarsToFloat($(this).children("td.money").text()),
+                    $(this).children("td.date").text(),
+                    description.attr("title"),
+                    index
+                ));
+            });
+        } else if (window.location.href.search(/bankofamerica\.com/) != -1 ||
+                   window.location.href.search(/BofA\.html/) != -1) {
+            // Location: bank of america
+            if (window.desc != undefined && window.collapseAlt != undefined) {
+                for (var i = 0; i < desc.length; i++) {
+                    var name = cleanTxName(desc[i]);
+                    if (name != null) {
+                        chutney.txdata.txs.push(new Tx(
+                            cleanTxName(desc[i]),
+                            dollarsToFloat(collapseAlt[i]),
+                            $("#row" + i + " td:eq(2)").text().trim(),
+                            desc[i],
+                            i
+                        ));
+                    }
+                }
             }
-        });
+        }
+        // Assemble the list of all names
+        for (var i = 0; i < chutney.txdata.txs.length; i++) {
+            var tx = chutney.txdata.txs[i];
+            if (typeof chutney.txdata.tx_names[tx.name] == "undefined") {
+                chutney.txdata.tx_names[tx.name] = [tx];
+            } else {
+                chutney.txdata.tx_names[tx.name].push(tx);
+            }
+        }
+        if (chutney.txdata.txs.length == 0) {
+            // Not found -- show instructions.
+        }
     },
     queryApi: function() {
         var names = [];
         for (var name in chutney.txdata.tx_names) {
+            if (name.search(/TRANSFER/i) != -1) {
+                continue;
+            }
             if (chutney.overrides[name] != undefined) {
                 if (chutney.overrides[name].length > 0) {
                     names.push(chutney.overrides[name]);
@@ -367,9 +437,8 @@ var chutney = {
                     draggable: false
                 });
             }, API_TIMEOUT);
-        $.getJSON(INFO_SEARCH_URL + "?callback=?", {'q': names.join(",") },
+        $.getJSON(INFO_SEARCH_URL + "?callback=?", {'q': names.join(","), 'fuzzy': '1' },
             function(data) {
-                console.log("query results:", data);
                 clearTimeout(jsonError);
                 chutney.recipeDone = true; // stop the blending
                 var txdata = chutney.txdata;
@@ -444,16 +513,14 @@ var chutney = {
         chutney.overrides[orig] = newCorpName;
         chutney.storeOverrides();
         chutney.drawOverrides();
-        $.getJSON(INFO_MATCH_URL + "?callback=?", {q: newCorpName},
+        $.getJSON(INFO_SEARCH_URL + "?callback=?", {q: newCorpName, fuzzy: 0},
             function(data) {
-                console.log("name match:", data);
                 var corp;
                 for (var name in data) {
                     // add first entry
                     corp = data[name];
                     break;
                 }
-                console.log(orig, newCorpName, corp);
                 if (corp != undefined) {
                     chutney.txdata.corps[newCorpName] = corp;
                     var i = 0;
@@ -529,7 +596,7 @@ var chutney = {
             if (true) { //tx.amount < 0) {
                 var pb = {};
                 for (var party in tx.corp.party_breakdown) {
-                    pb[party] = parseFloat(tx.corp.party_breakdown[party][1]);
+                    pb[party] = Math.round(parseFloat(tx.corp.party_breakdown[party][1]));
                 }
                 chutney.postLoadQueue.push(function() {
                     minipie(partyBreakdownId, pb, "party");
@@ -545,7 +612,7 @@ var chutney = {
                                           tx.getMappingId()  + "\");'>wrong match</a>?)" +
                         "</span>" +
                     "</td>" +
-                    "<td class='amount " + amountClass + "'>" + tx.amount + "</td>" +
+                    "<td class='amount " + amountClass + "'>" + floatToDollars(tx.amount) + "</td>" +
                     "<td class='party-breakdown' rowspan='2'>" +
                         "<div class='tx-party-breakdown' id='" + partyBreakdownId + "'></div>" +
                     "</td>" +
@@ -689,8 +756,9 @@ var chutney = {
             for (var name in chutney.txdata.totals.recipients) {
                 recipientData.push({
                     key: name.substring(0, 27) + (name.length > 27 ? "..." : ""),
-                    value: Math.round(chutney.txdata.totals.recipients[name] * ratio),
-                    href: recipientUrl({name: name, id: chutney.txdata.recipient_ids[name]})            });
+                    value: Math.round(chutney.txdata.totals.recipients[name] * ratio) + '.00',
+                    href: recipientUrl({name: name, id: chutney.txdata.recipient_ids[name]})
+                });
             }
             recipientData.sort(function(a, b) {
                 return b.value - a.value;
