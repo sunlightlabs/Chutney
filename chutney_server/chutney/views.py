@@ -46,14 +46,18 @@ def name_search(request):
     """
     term = request.GET.get('term', "")
     clean_terms = corp_matcher.clean(term).split()
-    orgs = []
+    orgs = set()
     for name in corp_matcher.corps.keys():
         for term in clean_terms:
             if term not in name:
                 break
         else:
-            orgs.append(corp_matcher.corps[name])
+            orgs.add(corp_matcher.corps[name])
 
+    if len(orgs) > 100 and term not in orgs:
+        orgs = []
+    else:
+        orgs = list(orgs)
     return _json_response(request, simplejson.dumps(orgs))
 
 def assemble_js(request):

@@ -30,39 +30,52 @@ class CorpMatcher(object):
             os.path.join(os.path.dirname(__file__), "Top10000List.csv"))
     N_GRAPHS = 4
     shortcuts = {
-            'ACLU': "American Civil Liberties Union",
-            'DCCC': "Democratic Congressional Campaign Cmte",
-            'DNC': "Democratic National Cmte",
-            'IRS': "Internal Revenue Service",
-            'NEA': "National Education Assn",
-            'UPS': "United Parcel Service",
-            'USPS': "US Postal Service",
-            'ITUNES': "Apple Inc",
-            'APPLE': "Apple Inc",
-            'TARGET': "Target Corp",
-            'BP': "BP",
-            'MCDONALD S': "McDonald's Corp",
-            'SHELL': "Royal Dutch Shell",
-            "DELTA": "Delta Airlines",
+            "ACLU": "American Civil Liberties Union",
+            "AMAZON": "Amazon.com",
+            "APPLE": "Apple Inc",
+            "AT T": "AT&T Inc",
+            "BAJA FRESH": "Wendy's/Arby's Group",
             "BANANA BR": "Gap Inc",
             "BANANA REP": "Gap Inc",
             "BANANA REPUBLIC": "Gap Inc",
-            "KROGER": "KROGER CO",
-            "BAJA FRESH": "Wendy's/Arby's Group",
-            "OLIVE GARDEN": "Darden Restaurants",
-            "RED LOBSTER": "Darden Restaurants",
-            "JIFFY LUBE": "Royal Dutch Shell",
-            "FLICKR": "Yahoo! Inc",
-            "CHEVRON": "Chevron Corp",
-            "PIZZA HUT": "Pizza Hut",
-            "TGI FRIDAY S": "Carlson Companies",
-            "CHILI S": "Brinker International",
-            "STAPLES": "Staples Inc",
-            "COSTCO": "Costco Wholesale",
-            "PAYPAL": "eBay Inc",
-            "GOOGLE": "Google Inc",
-            "NETFLIX": "Netflix Inc",
             "BKOFAMERICA": "Bank of America",
+            "BP": "BP",
+            "CHEVRON": "Chevron Corp",
+            "CHILI S": "Brinker International",
+            "COSTCO": "Costco Wholesale",
+            "CVS": "CVS Caremark Corp",
+            "DCCC": "Democratic Congressional Campaign Cmte",
+            "DELTA": "Delta Airlines",
+            "DNC": "Democratic National Cmte",
+            "FLICKR": "Yahoo! Inc",
+            "GOOGLE": "Google Inc",
+            "HARRIS TEETER": "Ruddick Corp",
+            "INTUIT": "Intuit Inc",
+            "IRS": "Internal Revenue Service",
+            "ITUNES": "Apple Inc",
+            "JIFFY LUBE": "Royal Dutch Shell",
+            "KROGER": "KROGER CO",
+            "MCDONALD S": "McDonald's Corp",
+            "NEA": "National Education Assn",
+            "NETFLIX": "Netflix Inc",
+            "OLIVE GARDEN": "Darden Restaurants",
+            "PAYPAL": "eBay Inc",
+            "PANERA": "Panera LLC",
+            "PIZZA HUT": "Pizza Hut",
+            "PUBLIX": "Publix Super Markets", 
+            "RACKSPACE": "Rackspace US",
+            "RED LOBSTER": "Darden Restaurants",
+            "SHELL": "Royal Dutch Shell",
+            "SONY": "Sony Corp",
+            "SKYPE": "eBay Inc",
+            "STAPLES": "Staples Inc",
+            "TARGET": "Target Corp",
+            "TGI FRIDAY S": "Carlson Companies",
+            "TMOBILE": "T-Mobile USA",
+            "UPS": "United Parcel Service",
+            "USPS": "US Postal Service",
+            "VANGUARD": "Vanguard Group",
+            "VERIZON": "Verizon Communications",
     }
 
     def __init__(self):
@@ -107,7 +120,7 @@ class CorpMatcher(object):
         results = []
         for match in best_match:
             dist = self.distance(match, string)
-            if dist <= 2:
+            if dist < 0.6:
                 results.append((dist, match))
         results.sort()
         return [r for d,r in results]
@@ -125,17 +138,17 @@ class CorpMatcher(object):
     @classmethod
     def distance(cls, w1, w2):
         """ 
-        Return the ratio of the number of words that are different between the
-        two strings to the number of words they have in common.
-        e.g. "fun times", "fun rhymes" => 1 (fun) / 2 (times, rhymes).
+        Return the Jaccard distance -- the ratio of the number of words that
+        are different between the two strings to the sum of all words in
+        either.  
+        e.g. "fun times", "fun rhymes" => 2 (times, rhymes) / 3 (times, rhymes, fun).
         """
         p1 = set(w1.split())
         p2 = set(w2.split())
-        intersection = p1 & p2
-        difference = p1 ^ p2
-        if len(intersection) == 0:
-            return 100
-        return len(difference) / len(intersection)
+        try:
+            return len(p1 ^ p2) / len(p1 | p2)
+        except ZeroDivisionError:
+            return 10000
 
 class Api(object):
     """

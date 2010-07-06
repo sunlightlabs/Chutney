@@ -1,5 +1,5 @@
 jQuery.noConflict();
-if (typeof window.console == "undefined") { window.console = { log: function() {} }; }
+if (typeof window.console === "undefined") { window.console = { log: function() {} }; }
 (function() {
 var $ = jQuery;
 
@@ -60,53 +60,6 @@ if (typeof String.trim === "undefined") {
         return this.replace(/^\s*/, "").replace(/\s*$/, "");
     }
 }
-function cleanTxName(orig) {
-    // Take a typical ugly transaction string, nand turn it into a few words
-    // that are likely to match the corporation name.
-    var string = orig;
-    
-    // 0. Early outs for things we shouldn't bother with.
-    if (string.search(/(^|\s)(TRANSFER)(?=$|\s)/gi) != -1) {
-        return null;
-    }
-    // 1. Remove HTML
-    string = string.replace(/<[\w\/]+>/g, ' ');
-
-    // 2. Replace special characters and numbers with spaces, then strip extraneous spaces.
-    string = string.replace(/[^A-Z\. ]/gi, ' ');
-   // only get rid of .'s if they aren't part of URLs
-    string = string.replace(/\.(?!(com|org|net))/gi, ' ');
-
-    // 3. Remove stop words.
-    string = string.replace(/(^|\s)(PURCHASE|DEPOSIT|CHECKCARD|AUTH|ACCT|DEP|DES|INST|XFER|ID|WWW|WITHDRWL|WITHDRAWL|ONLINE)(?=$|\s)/gi, "");
-
-    // 4. Remove extraneous whitespace.
-    string = string.trim().replace(/\s+/g, ' ');
-
-    // 5. Keep only the first couple of words, and make the cases nice.
-    var parts = string.split(' ');
-    var result = "";
-    for (var i = 0; i < parts.length && result.length < 14; i++) {
-        if (parts[i].length > 1 
-                && result.search(parts[i]) == -1
-                && parts[i].search(/^TH$/) == -1) {
-            var word;
-            if (parts[i].search(/\./) != -1 || parts[i].search(/^(of|the|in|to)$/g) != -1) {
-                // all lower case -- URLs or small words
-                word = parts[i].toLowerCase();
-            } else if (parts[i].length <= 3 && parts[i].search(/^(INC)$/g) == -1) {
-                // all upper case -- acronyms
-                word = parts[i].toUpperCase();
-            } else {
-                // initial capitals
-                word = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1).toLowerCase();
-            }
-            result += " " + word;
-        }
-    }
-    string = result.trim();
-    return string;
-}
 
 // Largely copied from brisket_charts.js "piechart" implementation
 function minipie(div, data, type) {
@@ -161,10 +114,6 @@ function minipie(div, data, type) {
         lbl.hide();
     });
 }
-function mappingIdFor(corp, name) {
-    return (corp ? corp.info.id : "unmatched") + slugify(name);
-}
-
 /***************************************************************
 * Transaction objects
 ****************************************************************/
@@ -213,14 +162,163 @@ function Tx(name, amount, date, orig, order) {
 }
 Tx.prototype = TxPrototype;
 
+function mappingIdFor(corp, name) {
+    // a mapping ID is a string representing a unique match between a
+    // corporation and a transaction string, usable for selectors that want to
+    // grab all matching transactions when overriding matches.
+    return (corp ? corp.info.id : "unmatched") + slugify(name);
+}
+function cleanTxName(orig) {
+    // Take a typical ugly transaction string, nand turn it into a few words
+    // that are likely to match the corporation name.
+    var string = orig;
+    
+    // 0. Early outs for things we shouldn't bother with.
+    if (string.search(/(^|\s)(TRANSFER)(?=$|\s)/gi) != -1) {
+        return null;
+    }
+    // 1. Remove HTML
+    string = string.replace(/<[\w\/]+>/g, ' ');
+
+    // 2. Replace special characters and numbers with spaces, then strip extraneous spaces.
+    string = string.replace(/[^-A-Z\. ]/gi, ' ');
+   // only get rid of .'s if they aren't part of URLs
+    string = string.replace(/\.(?!(com|org|net))/gi, ' ');
+
+    // 3. Remove stop words.
+    string = string.replace(/(^|\s)(ACCT|AUTH|AUTOMATED|CHECKCARD|DEP|DEPOSIT|DES|ID|INST|ONLINE|POS|PURCHASE|STATEMENT NAME|TX|WITHDRAW|WITHDRAWL|WITHDRWL|WWW|XFER)(?=$|\s)/gi, "");
+
+    // 4. Remove extraneous whitespace.
+    string = string.trim().replace(/\s+/g, ' ');
+
+    // 5. Keep only the first couple of words, and make the cases nice.
+    var parts = string.split(' ');
+    var result = "";
+    for (var i = 0; i < parts.length && result.length < 14; i++) {
+        if (parts[i].length > 1 
+                && result.search(parts[i]) == -1
+                && parts[i].search(/^TH$/) == -1) {
+            var word;
+            if (parts[i].search(/\./) != -1 || parts[i].search(/^(of|the|in|to)$/g) != -1) {
+                // all lower case -- URLs or small words
+                word = parts[i].toLowerCase();
+            } else if (parts[i].length <= 3 && parts[i].search(/^(INC)$/g) == -1) {
+                // all upper case -- acronyms
+                word = parts[i].toUpperCase();
+            } else {
+                // initial capitals
+                word = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1).toLowerCase();
+            }
+            result += " " + word;
+        }
+    }
+    string = result.trim();
+    return string;
+}
+function autoDetectTxs() {
+    // Look through the page and try to find any transactions that might appear
+    // there.  Assume that transactions will be found in <tr>'s, with one row
+    // per transaction, and a date, amount, and description in <td>'s contained
+    // within the <tr>.  Read the source for all the nitty-gritty decision
+    // rules.
+    var txParams = [];
+    // Parse all frames if we are in a frameset.
+    var docs = [];
+    if (window.frames && window.frames.length > 0) {
+        for (var i = 0; i < window.frames.length; i++) {
+            docs.push(window.frames[i].document);
+        }
+    } else {
+        docs.push(window.document);
+    }
+
+    $(docs).find("tr").each(function(index) {
+        var params = {};
+        $(this).children("td").each(function() {
+            var text = $(this).text().replace(/<[\w\/]+>/, "").trim();
+            if (text.length > 200) {
+                return;
+            }
+            // Amounts: They have a "$" symbol, and contain no letters.
+            if ((text.search(/\$/) != -1 || text.search(/(^|[^\.])\d+\.\d\d($|\s)/) != -1)
+                     && text.search(/a-z/i) == -1) {
+                var f = dollarsToFloat(text);
+                if (params.amount == undefined || f < params.amount) {
+                    params.amount = f;
+                }
+                return;
+            }
+            // Dates: they either contain a textual month name, or are composed
+            // only of numbers in valid date ranges and joining chars such as
+            // "-" and "/".
+            var pot_date;
+            if (text.search(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i) != -1 && 
+                        text.replace(/\s/g, "").length <= "September30,2010".length) {
+                pot_date = text;
+            } else if (text.search(/[^-0-9\/\s]/) == -1 && 
+                        text.replace(/[^0-9]/g, "").length <= "20100530".length) {
+                pot_date = text;
+            }
+            if (pot_date) {
+                // Loop through numbers, and ensure that each one present is in
+                // a valid range.
+                var parts = pot_date.split(/[^0-9]/);
+                var badNum = false;
+                var numCount = 0;
+                for (var i = 0; i < parts.length; i++) {
+                    try {
+                        var num = parseInt(parts[i]);
+                        if (num < 1 || (num > 31 && num < 1980) || (num > 2100)) {
+                            badNum = true;
+                            break;
+                        } else if (!isNaN(num)) {
+                            numCount += 1;
+                        }
+                    } catch(err) {
+                        continue;
+                    }
+                }
+                if (!badNum && numCount > 0) {
+                    var trimmed = text.trim();
+                    if (trimmed) {
+                        params.date = trimmed;
+                    }
+                }
+                return;
+            }
+            // Transaction strings: They're between 5 and 100 characters long,
+            // and contain at least one number.
+            var textOptions = [text, $(this).attr("title")];
+            for (var i = 0; i < textOptions.length; i++) {
+                var str = textOptions[i];
+                if (str.length > 5 && str.length < 100 && str.search(/[0-9]/) != -1) {
+                    params.orig = str;
+                    return;
+                }
+            }
+        });
+        if (params.date && params.amount && params.orig) {
+            params.name = cleanTxName(params.orig);
+            if (params.name) {
+                txParams.push(params);
+            }
+        }
+    });
+    return txParams;
+}
+
+
+
 /************************************************************************
-* Public namespace for chutney methods
+* Public namespace for chutney methods.
 *************************************************************************/
 var chutney = {
     /*
     *  Load necessary javascript and css, parse transactions, then query API.
     */
     start: function() {
+        // TODO Do something special if we are launching from the page where you get the bookmarklet.
+
         if (!scriptsInserted) {
             var head = document.getElementsByTagName("head")[0];
             for (var i = 0; i < stylesheets.length; i++) {
@@ -233,13 +331,15 @@ var chutney = {
             }
             scriptsInserted = true;
         }
-        chutney.setUp();
-        // Funny scroll positions mess up modal dialog.
-        chutney.div.dialog('open');
-        $(window).scrollTop(0);
+
+        // parse transactions before mucking with DOM
+        chutney.setUpData();
         chutney.parseTransactions();
-        chutney.queryApi();
+
+        // muck with DOM
+        chutney.setUpHtml();
         chutney.recipe();
+        chutney.queryApi();
     },
     fixOffset: function () {
         var offset = $(chutney.div).parents(".ui-dialog").offset();
@@ -276,10 +376,28 @@ var chutney = {
     /*
     *  Create the overlay that we will display things in, and set up data structures.
     */
-    setUp: function() {
+    setUpHtml: function() {
         // A queue of functions to execute after we've loaded everything we need to
         // (e.g. to operate on DOM elements once they've been loaded, such as charts)
         chutney.postLoadQueue = [];
+        // frameset hack -- remove framesets and add body.
+        if ($("frameset")) {
+            chutney.frameset = $("html").children("frameset").remove();
+            document.body = document.createElement("body");
+            $("html").append(
+                $(document.body).html("&nbsp;").css({
+                    'overflow': 'auto',
+                    'position': 'relative',
+                    'height': '100%',
+                    'width': '100%',
+                    'padding': '0px',
+                    'margin': '0px'
+                })
+            );
+            for (var i = 0; i < 100; i++) {
+                $(document.body).append("&nbsp;<br />");
+            }
+        }
         if (chutney.div == undefined) {
             chutney.div = $(document.createElement("div")).attr({'id': "chutney"});
             chutney.div.html(
@@ -304,9 +422,37 @@ var chutney = {
                 position: 'top',
                 draggable: false,
                 resizable: false,
-                title: "Chutney: How hot is your money?"
+                title: "Chutney: How hot is your money?",
+                close: chutney.tearDown
             });
         }
+        if (chutney.txdata.txs.length == 0) {
+            $(document.createElement("div"))
+                .attr("title", "No transactions found")
+                .html("<p>Sorry, we couldn't find any transactions on this page.</p>")
+                .dialog({
+                    buttons: {
+                        shucks: function() {
+                            $(this).dialog('close');
+                            $(this).remove();
+                            chutney.tearDown();
+                        }
+                    },
+                    resizable: false,
+                    draggable: false
+                });
+        } else {
+            chutney.div.dialog('open');
+            $(window).scrollTop(0);
+        }
+        if (chutney.frameset) {
+            // workaround for firefox scrolling bug
+            $("#chutney").css({ height: "100%", scroll: "auto" });
+            $("#chutney").append("<br /><br /><br />");
+        }
+
+    },
+    setUpData: function() {
         if (chutney.txdata == undefined) {
             chutney.txdata = {};
         }
@@ -323,6 +469,12 @@ var chutney = {
                 chutney.storeOverrides();
             }
 
+        }
+    },
+    tearDown: function() {
+        if (chutney.frameset) {
+            // rather than trying to rebuild frames, just reload page.
+            location.reload(true);
         }
     },
     /*
@@ -359,7 +511,7 @@ var chutney = {
         chutney.txdata.tx_names = {};
         if (window.location.href.search(/mint\.com/) != -1 ||
                 window.location.href.search(/mint\.html/) != -1) {
-            // Location: mint.com
+            // Special case: mint.com.  Use mint's parsed strings rather than ours.
             $("#transaction-list-body > tr").each(function(index) {
                 var description = $(this).children("td[title]");
                 chutney.txdata.txs.push(new Tx( 
@@ -370,9 +522,10 @@ var chutney = {
                     index
                 ));
             });
-        } else if (window.location.href.search(/bankofamerica\.com/) != -1 ||
-                   window.location.href.search(/BofA\.html/) != -1) {
-            // Location: bank of america
+        } else if (window.location.href.search(/bankofamerica\.com/) != -1) {
+            // Special case: bankofamerica.com.  They give us global vars "desc"
+            // and "collapseAlt" which we can use instead of the more brittle
+            // parsing.
             if (window.desc != undefined && window.collapseAlt != undefined) {
                 for (var i = 0; i < desc.length; i++) {
                     var name = cleanTxName(desc[i]);
@@ -387,6 +540,18 @@ var chutney = {
                     }
                 }
             }
+        } else {
+            // Otherwise, attempt to auto-detect all transactions in the page.
+            var txParams = autoDetectTxs();
+            for (var i = 0; i < txParams.length; i++) {
+                chutney.txdata.txs.push(new Tx(
+                    txParams[i].name,
+                    txParams[i].amount,
+                    txParams[i].date,
+                    txParams[i].orig,
+                    i
+                ));
+            }
         }
         // Assemble the list of all names
         for (var i = 0; i < chutney.txdata.txs.length; i++) {
@@ -397,11 +562,11 @@ var chutney = {
                 chutney.txdata.tx_names[tx.name].push(tx);
             }
         }
-        if (chutney.txdata.txs.length == 0) {
-            // Not found -- show instructions.
-        }
     },
     queryApi: function() {
+        if (chutney.txdata.txs.length == 0) {
+            return;
+        }
         var names = [];
         for (var name in chutney.txdata.tx_names) {
             if (name.search(/TRANSFER/i) != -1) {
