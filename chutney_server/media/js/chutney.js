@@ -32,8 +32,7 @@ function organizationUrl(org) {
 }
 
 function dollarsToFloat(dollars) {
-    // WATCHOUT: unicode version of &ndash; here.
-    dollars = dollars.replace(/[–]/g, "-");
+    dollars = dollars.replace(/[\u2012\u2013\u2014\u2015]/g, "-"); // replace literal dashes 
     dollars = dollars.replace(/[^-0-9\.]/g, "");
     return parseFloat(dollars);
 }
@@ -126,6 +125,7 @@ var TxPrototype = {
             d = pb.Democrats != undefined ? parseFloat(pb.Democrats[1]) : 0;
             o = pb.Other != undefined ? parseFloat(pb.Other[1]) : 0;
             var total = r + d + o;
+            // party breakdown proportional to transaction amount (dubious?)
             this.party_breakdown = {
                 'Republicans': this.amount * (r / total),
                 'Democrats': this.amount * (d / total),
@@ -177,10 +177,12 @@ function cleanTxName(orig) {
     if (string.search(/(^|\s)(TRANSFER)(?=$|\s)/gi) != -1) {
         return null;
     }
-    // 1. Remove HTML
-    string = string.replace(/<[\w\/]+>/g, ' ');
+    // 1. Remove HTML tags
+    var tmp = document.createElement("div");
+    tmp.innerHTML = string;
+    string = tmp.textContent||tmp.innerText;
 
-    // 2. Replace special characters and numbers with spaces, then strip extraneous spaces.
+    // 2. Replace special characters and numbers with spaces
     string = string.replace(/[^-A-Z\. ]/gi, ' ');
    // only get rid of .'s if they aren't part of URLs
     string = string.replace(/\.(?!(com|org|net))/gi, ' ');
@@ -239,7 +241,8 @@ function autoDetectTxs() {
             if (text.length > 200) {
                 return;
             }
-            // Amounts: They have a "$" symbol, and contain no letters.
+            // Amounts: They have a "$" symbol, and contain no letters, or at
+            // least follow a %f.02 pattern.
             if ((text.search(/\$/) != -1 || text.search(/(^|[^\.])\d+\.\d\d($|\s)/) != -1)
                      && text.search(/a-z/i) == -1) {
                 var f = dollarsToFloat(text);

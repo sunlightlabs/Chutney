@@ -68,15 +68,15 @@ def assemble_js(request):
     """
     root = "%sjs/" % (settings.MEDIA_ROOT)
     ieroot = "http://beta.influenceexplorer.com/media/js/"
-    ieroot = "/home/tc1/dc/brisket/media/js/"
+    #ieroot = "/home/tc1/work/dc/brisket/media/js/"
     js = [
         ieroot + "underscore-1.0.2.min.js",
         ieroot + "raphael-min.js",
         ieroot + "g.raphael-min.js",
         ieroot + "g.pie.patched.js",
         ieroot + "g.bar.jeremi.js",
-        root + "brisket_charts.js",
-        root + "jquery.min.js",
+        ieroot + "brisket_charts.js",
+        ieroot + "jquery-1.4.2.min.js",
         root + "jquery-ui.min.js",
         root + "jquery.cookie.js",
         root + "chutney.js",
