@@ -1,9 +1,6 @@
 @import "compass/reset/utilities"
 @import "blueprint"
 
-blueprint #chutney
-nested-reset #chutney
-
 #chutney
   // Basics
   font-family: Cambria, Georgia, Times, "Times New Roman", serif
@@ -41,63 +38,44 @@ nested-reset #chutney
   strong
     font-weight: bold
 
-  table.chutney-txs
+  table.transactions
+    td
+      width: 5%
+    td + td
+      width: 45%
+    td + td + td
+      width: 45%
+    td + td + td + td
+      width: 5%
     border-collapse: collapse
-    tr.chutney-tx, tr.chutney-issues
+    tr.tx, tr.org
       padding: 0.1em
       border: 1px solid #aaa
       padding: 0.2em
-
-    .wrong-match
-      visibility: hidden
-      color: #999
-      margin-left: 2em
-      a, a:visited
-        color: #C500C5
-
     tr.matched
       border-bottom: none
-      &:hover
-        .wrong-match
-          visibility: visible
-
-    tr.chutney-issues
+    tr.org
       border-top: none 
 
-    td.pos
-      color: green
+  .org, .org a, .org a:visited
+    color: #999
+    font-size: smaller
 
-    td.party-breakdown
-      div 
-        width: 70px
-        height: 60px
+  div.party-breakdown
+    width: 70px
+    height: 60px
+    float: left
 
-    tr.unmatched
-      form
-        visibility: hidden
-      &:hover
-        form
-          visibility: visible
-      .bad-name
-        background-color: pink
-       
+  .tx-tooltip
+    background-color: white
+    border: 1px solid black
+    position: absolute
+    z-index: 2
+    padding: 1em
+    td + td
+      padding-left: 0.5em
 
-    .match
-      font-weight: bold
-    .chutney-issues, .chutney-issues a, .chutney-issues a:visited
-      color: #999
-      font-size: smaller
 
-  .totals
-    +clearfix
 
-    .total-party-breakdown
-      width: 270px
-      height: 150px
-      float: left
-    
-    .recipient-totals
-      width: 630px
-      height: 200px
-      float: left
-      position: relative
+blueprint #chutney
+nested-reset #chutney

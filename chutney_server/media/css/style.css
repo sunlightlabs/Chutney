@@ -1,14 +1,14 @@
-/* line 7, ././style.sass */
+/* line 4, ././style.sass */
 #chutney {
   font-family: Cambria, Georgia, Times, "Times New Roman", serif;
   font-size: 10pt;
   line-height: 1.5em;
 }
-/* line 13, ././style.sass */
+/* line 10, ././style.sass */
 #chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
   font-family: Cambria, Georgia, Times, "Times New Roman", serif;
 }
-/* line 15, ././style.sass */
+/* line 12, ././style.sass */
 #chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
   margin-left: -0.5em;
   font-size: 1.8em;
@@ -16,124 +16,97 @@
   margin-bottom: 0.5em;
   font-weight: bold;
 }
-/* line 21, ././style.sass */
+/* line 18, ././style.sass */
 #chutney h2 {
   font-size: 1.4em;
 }
-/* line 23, ././style.sass */
+/* line 20, ././style.sass */
 #chutney h3 {
   font-size: 1.2em;
 }
-/* line 25, ././style.sass */
+/* line 22, ././style.sass */
 #chutney h4 {
   font-size: 1em;
 }
-/* line 27, ././style.sass */
+/* line 24, ././style.sass */
 #chutney h5 {
   font-size: 0.8em;
 }
-/* line 29, ././style.sass */
+/* line 26, ././style.sass */
 #chutney h6 {
   font-size: 0.6em;
 }
-/* line 31, ././style.sass */
+/* line 28, ././style.sass */
 #chutney p {
   margin-top: 1.5em;
   margin-bottom: 1.5em;
 }
-/* line 35, ././style.sass */
+/* line 32, ././style.sass */
 #chutney .mono {
   font-family: monospace;
 }
-/* line 38, ././style.sass */
+/* line 35, ././style.sass */
 #chutney small {
   font-size: 0.8em;
 }
-/* line 41, ././style.sass */
+/* line 38, ././style.sass */
 #chutney strong {
   font-weight: bold;
 }
-/* line 44, ././style.sass */
-#chutney table.chutney-txs {
+/* line 41, ././style.sass */
+#chutney table.transactions {
   border-collapse: collapse;
 }
+/* line 42, ././style.sass */
+#chutney table.transactions td {
+  width: 5%;
+}
+/* line 44, ././style.sass */
+#chutney table.transactions td + td {
+  width: 45%;
+}
 /* line 46, ././style.sass */
-#chutney table.chutney-txs tr.chutney-tx, #chutney table.chutney-txs tr.chutney-issues {
+#chutney table.transactions td + td + td {
+  width: 45%;
+}
+/* line 48, ././style.sass */
+#chutney table.transactions td + td + td + td {
+  width: 5%;
+}
+/* line 51, ././style.sass */
+#chutney table.transactions tr.tx, #chutney table.transactions tr.org {
   padding: 0.1em;
   border: 1px solid #aaaaaa;
   padding: 0.2em;
 }
-/* line 51, ././style.sass */
-#chutney table.chutney-txs .wrong-match {
-  visibility: hidden;
-  color: #999999;
-  margin-left: 2em;
-}
 /* line 55, ././style.sass */
-#chutney table.chutney-txs .wrong-match a, #chutney table.chutney-txs .wrong-match a:visited {
-  color: #c500c5;
-}
-/* line 58, ././style.sass */
-#chutney table.chutney-txs tr.matched {
+#chutney table.transactions tr.matched {
   border-bottom: none;
 }
-/* line 61, ././style.sass */
-#chutney table.chutney-txs tr.matched:hover .wrong-match {
-  visibility: visible;
-}
-/* line 64, ././style.sass */
-#chutney table.chutney-txs tr.chutney-issues {
+/* line 57, ././style.sass */
+#chutney table.transactions tr.org {
   border-top: none;
 }
-/* line 67, ././style.sass */
-#chutney table.chutney-txs td.pos {
-  color: green;
-}
-/* line 71, ././style.sass */
-#chutney table.chutney-txs td.party-breakdown div {
-  width: 70px;
-  height: 60px;
-}
-/* line 76, ././style.sass */
-#chutney table.chutney-txs tr.unmatched form {
-  visibility: hidden;
-}
-/* line 79, ././style.sass */
-#chutney table.chutney-txs tr.unmatched:hover form {
-  visibility: visible;
-}
-/* line 81, ././style.sass */
-#chutney table.chutney-txs tr.unmatched .bad-name {
-  background-color: pink;
-}
-/* line 85, ././style.sass */
-#chutney table.chutney-txs .match {
-  font-weight: bold;
-}
-/* line 87, ././style.sass */
-#chutney table.chutney-txs .chutney-issues, #chutney table.chutney-txs .chutney-issues a, #chutney table.chutney-txs .chutney-issues a:visited {
+/* line 60, ././style.sass */
+#chutney .org, #chutney .org a, #chutney .org a:visited {
   color: #999999;
   font-size: smaller;
 }
-/* line 91, ././style.sass */
-#chutney .totals {
-  overflow: hidden;
-  display: inline-block;
-}
-/* line 8, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/utilities/general/./_hacks.scss */
-#chutney .totals {
-  display: block;
-}
-/* line 94, ././style.sass */
-#chutney .totals .total-party-breakdown {
-  width: 270px;
-  height: 150px;
+/* line 64, ././style.sass */
+#chutney div.party-breakdown {
+  width: 70px;
+  height: 60px;
   float: left;
 }
-/* line 99, ././style.sass */
-#chutney .totals .recipient-totals {
-  width: 630px;
-  height: 200px;
-  float: left;
-  position: relative;
+/* line 69, ././style.sass */
+#chutney .tx-tooltip {
+  background-color: white;
+  border: 1px solid black;
+  position: absolute;
+  z-index: 2;
+  padding: 1em;
+}
+/* line 75, ././style.sass */
+#chutney .tx-tooltip td + td {
+  padding-left: 0.5em;
 }
