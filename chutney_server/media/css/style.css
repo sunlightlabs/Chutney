@@ -143,20 +143,25 @@
   padding: 0.2em;
 }
 /* line 102, ././style.sass */
+#chutney .tx-tooltip td {
+  color: white;
+  font-weight: normal;
+}
+/* line 105, ././style.sass */
 #chutney .tx-tooltip td + td {
   padding-left: 0.5em;
 }
-/* line 104, ././style.sass */
+/* line 107, ././style.sass */
 #chutney .editor {
   background-color: white;
   position: absolute;
   padding: 1em;
 }
-/* line 108, ././style.sass */
+/* line 111, ././style.sass */
 #chutney .editor input.bad-name {
   background-color: pink;
 }
-/* line 111, ././style.sass */
+/* line 114, ././style.sass */
 #chutney div.party-breakdown {
   width: 70px;
   height: 60px;
