@@ -54,8 +54,11 @@ def name_search(request):
         else:
             orgs.add(corp_matcher.corps[name])
 
-    if len(orgs) > 100 and term not in orgs:
-        orgs = []
+    if len(orgs) > 50:
+        if term in orgs:
+            orgs = [term]
+        else:
+            orgs = []
     else:
         orgs = list(orgs)
     return _json_response(request, simplejson.dumps(orgs))

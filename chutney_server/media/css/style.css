@@ -1,14 +1,10 @@
 /* line 4, ././style.sass */
 #chutney {
-  font-family: Cambria, Georgia, Times, "Times New Roman", serif;
+  font-family: "Helvetica Neue", Arial, helvetica, sans-serif;
   font-size: 10pt;
   line-height: 1.5em;
 }
 /* line 10, ././style.sass */
-#chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
-  font-family: Cambria, Georgia, Times, "Times New Roman", serif;
-}
-/* line 12, ././style.sass */
 #chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
   margin-left: -0.5em;
   font-size: 1.8em;
@@ -16,97 +12,154 @@
   margin-bottom: 0.5em;
   font-weight: bold;
 }
-/* line 18, ././style.sass */
+/* line 16, ././style.sass */
 #chutney h2 {
   font-size: 1.4em;
 }
-/* line 20, ././style.sass */
+/* line 18, ././style.sass */
 #chutney h3 {
   font-size: 1.2em;
 }
-/* line 22, ././style.sass */
+/* line 20, ././style.sass */
 #chutney h4 {
   font-size: 1em;
 }
-/* line 24, ././style.sass */
+/* line 22, ././style.sass */
 #chutney h5 {
   font-size: 0.8em;
 }
-/* line 26, ././style.sass */
+/* line 24, ././style.sass */
 #chutney h6 {
   font-size: 0.6em;
 }
-/* line 28, ././style.sass */
+/* line 26, ././style.sass */
 #chutney p {
   margin-top: 1.5em;
   margin-bottom: 1.5em;
 }
-/* line 32, ././style.sass */
+/* line 29, ././style.sass */
 #chutney .mono {
   font-family: monospace;
 }
-/* line 35, ././style.sass */
+/* line 31, ././style.sass */
 #chutney small {
   font-size: 0.8em;
 }
-/* line 38, ././style.sass */
+/* line 33, ././style.sass */
 #chutney strong {
   font-weight: bold;
 }
-/* line 41, ././style.sass */
+/* line 37, ././style.sass */
+#chutney .about {
+  font-style: italic;
+  color: #999999;
+}
+/* line 43, ././style.sass */
+#chutney .viewmode {
+  overflow: hidden;
+  display: inline-block;
+  background-color: #eeeeee;
+  padding: 0.5em;
+  margin-bottom: 1em;
+}
+/* line 8, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/utilities/general/./_hacks.scss */
+#chutney .viewmode {
+  display: block;
+}
+/* line 48, ././style.sass */
+#chutney .viewmode h2 {
+  float: left;
+  margin: 0;
+  padding: 0;
+}
+/* line 52, ././style.sass */
+#chutney .viewmode ul {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  float: left;
+}
+/* line 57, ././style.sass */
+#chutney .viewmode ul li {
+  margin-left: 1em;
+  float: left;
+  list-style-type: none;
+}
+/* line 64, ././style.sass */
 #chutney table.transactions {
   border-collapse: collapse;
 }
-/* line 42, ././style.sass */
-#chutney table.transactions td {
-  width: 5%;
+/* line 66, ././style.sass */
+#chutney table.transactions th {
+  text-transform: uppercase;
+  text-align: left;
+  font-weight: normal;
+  font-size: larger;
+  cursor: pointer;
 }
-/* line 44, ././style.sass */
+/* line 72, ././style.sass */
+#chutney table.transactions td {
+  vertical-align: top;
+  width: 1%;
+  padding: 0.5em;
+}
+/* line 76, ././style.sass */
 #chutney table.transactions td + td {
   width: 45%;
+  border-bottom: 1px dotted #dddddd;
 }
-/* line 46, ././style.sass */
+/* line 79, ././style.sass */
 #chutney table.transactions td + td + td {
-  width: 45%;
+  width: 40%;
 }
-/* line 48, ././style.sass */
+/* line 81, ././style.sass */
 #chutney table.transactions td + td + td + td {
-  width: 5%;
+  width: 14%;
 }
-/* line 51, ././style.sass */
-#chutney table.transactions tr.tx, #chutney table.transactions tr.org {
-  padding: 0.1em;
-  border: 1px solid #aaaaaa;
+/* line 84, ././style.sass */
+#chutney table.transactions tr.tx a.editlink, #chutney table.transactions tr.tx a.editlink:visited {
+  margin-left: 1em;
+  color: #999999;
+}
+/* line 87, ././style.sass */
+#chutney table.transactions tr.org, #chutney table.transactions tr.org a, #chutney table.transactions tr.org a:visited {
+  color: #333333;
+}
+/* line 89, ././style.sass */
+#chutney table.transactions tr.unmatched {
+  color: #999999;
+}
+/* line 91, ././style.sass */
+#chutney table.transactions tr.even {
+  background-color: #eeeeee;
+}
+/* line 94, ././style.sass */
+#chutney .tx-tooltip {
+  background-color: black;
+  color: white;
+  opacity: 0.9;
+  position: absolute;
+  z-index: 5;
   padding: 0.2em;
 }
-/* line 55, ././style.sass */
-#chutney table.transactions tr.matched {
-  border-bottom: none;
+/* line 102, ././style.sass */
+#chutney .tx-tooltip td + td {
+  padding-left: 0.5em;
 }
-/* line 57, ././style.sass */
-#chutney table.transactions tr.org {
-  border-top: none;
+/* line 104, ././style.sass */
+#chutney .editor {
+  background-color: white;
+  position: absolute;
+  padding: 1em;
 }
-/* line 60, ././style.sass */
-#chutney .org, #chutney .org a, #chutney .org a:visited {
-  color: #999999;
-  font-size: smaller;
+/* line 108, ././style.sass */
+#chutney .editor input.bad-name {
+  background-color: pink;
 }
-/* line 64, ././style.sass */
+/* line 111, ././style.sass */
 #chutney div.party-breakdown {
   width: 70px;
   height: 60px;
   float: left;
-}
-/* line 69, ././style.sass */
-#chutney .tx-tooltip {
-  background-color: white;
-  border: 1px solid black;
-  position: absolute;
-  z-index: 2;
-  padding: 1em;
-}
-/* line 75, ././style.sass */
-#chutney .tx-tooltip td + td {
-  padding-left: 0.5em;
+  cursor: pointer;
 }

@@ -3,12 +3,10 @@
 
 #chutney
   // Basics
-  font-family: Cambria, Georgia, Times, "Times New Roman", serif
+  //font-family: Cambria, Georgia, Times, "Times New Roman", serif
+  font-family: "Helvetica Neue", Arial, helvetica, sans-serif 
   font-size: 10pt
   line-height: 1.5em
-
-  h1,h2,h3,h4,h5,h6
-    font-family: Cambria, Georgia, Times, "Times New Roman", serif
   h1, h2, h3, h4, h5, h6
     margin-left: -0.5em
     font-size: 1.8em
@@ -28,53 +26,93 @@
   p
     margin-top: 1.5em
     margin-bottom: 1.5em
-  
   .mono
     font-family: monospace
-  
   small
     font-size: 0.8em
-  
   strong
     font-weight: bold
 
+  // About
+  .about 
+    font-style: italic
+    color: #999
+
+  // View mode
+
+  .viewmode
+    +clearfix
+    background-color: #eee
+    padding: 0.5em
+    margin-bottom: 1em
+    h2
+      float: left
+      margin: 0
+      padding: 0
+    ul
+      margin: 0
+      padding: 0
+      font-weight: normal
+      float: left
+      li
+        margin-left: 1em
+        float: left
+        list-style-type: none
+
+  // Transactions
+
   table.transactions
+    border-collapse: collapse
+    th
+      text-transform: uppercase
+      text-align: left
+      font-weight: normal
+      font-size: larger
+      cursor: pointer
     td
-      width: 5%
+      vertical-align: top
+      width: 1%
+      padding: 0.5em
     td + td
       width: 45%
+      border-bottom: 1px dotted #ddd
     td + td + td
-      width: 45%
+      width: 40%
     td + td + td + td
-      width: 5%
-    border-collapse: collapse
-    tr.tx, tr.org
-      padding: 0.1em
-      border: 1px solid #aaa
-      padding: 0.2em
-    tr.matched
-      border-bottom: none
-    tr.org
-      border-top: none 
+      width: 14%
+    tr.tx
+      a.editlink, a.editlink:visited
+        margin-left: 1em
+        color: #999
+    tr.org, tr.org a, tr.org a:visited
+      color: #333
+    tr.unmatched
+      color: #999
+    tr.even
+      background-color: #eee
 
-  .org, .org a, .org a:visited
-    color: #999
-    font-size: smaller
+  .tx-tooltip
+    background-color: black
+    color: white
+    opacity: 0.9
+    //border: 1px solid #DDD
+    position: absolute
+    z-index: 5
+    padding: 0.2em
+    td + td
+      padding-left: 0.5em
+  .editor
+    background-color: white
+    position: absolute
+    padding: 1em
+    input.bad-name
+      background-color: pink
 
   div.party-breakdown
     width: 70px
     height: 60px
     float: left
-
-  .tx-tooltip
-    background-color: white
-    border: 1px solid black
-    position: absolute
-    z-index: 2
-    padding: 1em
-    td + td
-      padding-left: 0.5em
-
+    cursor: pointer
 
 
 blueprint #chutney
