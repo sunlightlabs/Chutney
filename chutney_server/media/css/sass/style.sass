@@ -1,9 +1,27 @@
+@import "compass/utilities/general/clearfix"
 @import "compass/reset/utilities"
-@import "blueprint"
 
+.ui-dialog, .ui-autocomplete
+  +nested-reset
+  font-size: 10pt
+  overflow: visible
+
+body.chutney
+  position: relative
+  overflow: scroll
+  height: 100%
+  width: 100%
+  margin: 0
+  padding: 0
+  overflow-x: hidden
+
+.ui-widget-overlay
+  +clearfix
+  
 #chutney
   // Basics
   //font-family: Cambria, Georgia, Times, "Times New Roman", serif
+  overflow: visible
   font-family: "Helvetica Neue", Arial, helvetica, sans-serif 
   font-size: 10pt
   line-height: 1.5em
@@ -93,8 +111,8 @@
 
   .tx-tooltip
     background-color: black
-    color: white
-    opacity: 0.9
+    color: #ddd
+    opacity: 0.85
     //border: 1px solid #DDD
     position: absolute
     z-index: 5
@@ -105,11 +123,26 @@
     td + td
       padding-left: 0.5em
   .editor
+    color: #333
     background-color: white
+    border: 1px dotted gray
     position: absolute
-    padding: 1em
+    padding: 1.3em
+    padding-top: 1.5em
+    text-align: center
+    width: 50%
     input.bad-name
       background-color: pink
+      z-index: 1000
+    table
+      font-size: smaller
+      width: 100%
+      td
+        width: 15%
+      td + td
+        width: 70%
+      td + td + td
+        width: 15%
 
   div.party-breakdown
     width: 70px
@@ -118,5 +151,3 @@
     cursor: pointer
 
 
-blueprint #chutney
-nested-reset #chutney

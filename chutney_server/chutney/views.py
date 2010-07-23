@@ -86,6 +86,9 @@ def assemble_js(request):
     ]
 
     out = StringIO()
+    out.write("var CHUTNEY_SERVER_URL = '%s';" % settings.SERVER_URL);
+    out.write("var CHUTNEY_BRISKET_URL = '%s';" % settings.BRISKET_URL);
+    out.write("var CHUTNEY_MEDIA_URL = '%s%s';" % (settings.SERVER_URL, settings.MEDIA_URL));
     for filename in js:
         print "... adding", filename
         if filename.startswith("http"):
@@ -94,5 +97,6 @@ def assemble_js(request):
         else:
             with open(filename) as fh:
                 out.write(fh.read())
+    
     return HttpResponse(out.getvalue(), content_type="text/javascript")
 
