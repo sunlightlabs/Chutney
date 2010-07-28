@@ -1,4 +1,5 @@
 jQuery.noConflict();
+// Define window.console in case we forget to remove a console.log call.
 if (typeof window.console === "undefined") { window.console = { log: function() {} }; }
 (function() {
 var $ = jQuery;
@@ -11,7 +12,7 @@ var API_TIMEOUT = 30 * 1000; // milliseconds
 
 var stylesheets = [
     "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css",
-    CHUTNEY_SERVER_URL + "/media/css/style.css"
+    CHUTNEY_MEDIA_URL + "/css/style.css"
 ];
 var COOKIE_NAME = "chutney";
 var COOKIE_DAYS = 365;
@@ -41,7 +42,14 @@ function floatToDollars(float) {
     } else {
         prefix = "$";
     }
-    return prefix + Math.abs(float).toFixed(2);
+    var parts = /(\d+)\.(\d+)/.exec(Math.abs(float).toFixed(2));
+    var int = parts[1]; 
+    var dec = int.length < 5 ? "." + parts[2] : "";
+    var commify = /(\d+)(\d{3})/;
+    while (commify.test(int)) {
+        int = int.replace(commify, '$1' + ',' + '$2');
+    }
+    return [prefix, int, dec].join("");
 }
 function slugify(string) {
     return string.trim().toLowerCase().replace(/[^-a-z0-9]/g, '-');
@@ -58,43 +66,27 @@ if (typeof String.trim === "undefined") {
     }
 }
 
-// Largely copied from brisket_charts.js "piechart" implementation
-function minipie(div, data, type) {
+var PARTY_COLORS = {"Republicans": "#E60002", "Democrats": "#186582", "Other": "#DCDDDE"};
+function minipie(div, data) {
+    // data should be a mapping of { party: amount }
     var r = Raphael(div);
-    var party_colors = {"Republicans": "#E60002", "Democrats": "#186582", "Other": "#DCDDDE"};
-    var other_colors = ["#EFCC01", "#F2E388"];
-    var slices = [];
-    var keys = _.keys(data);
-    var total = _(data).chain().values().reduce(0, function(memo, num) {
-        return memo + num;
-    }).value();
-
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        var value = data[key];
-        var color = (type && type == "party") ? party_colors[key] : other_colors[i];
-        var percent = Math.round((value / total) * 100);
-        var label = (key || ' ') + ' (' + percent + '%)';
-        if (label.length > 1) {
-            label = label.substring(0, 1).toUpperCase() + label.substr(1, label.length);
-        }
+    var slices = []
+    $.each(PARTY_COLORS, function(key, color) {
         slices.push({
-            value: value,
-            label: label,
-            color: color
+            'color': color,
+            // without a minimum value, things get funny
+            'value': data[key] ? data[key] : 0.01
         });
-    }
-
-    slices.sort(function(a, b) {
-        return b.value - a.value;
+    });
+    slices.sort(function(a, b) { return b.value - a.value });
+    var values = [];
+    var colors = [];
+    $.each(slices, function(i, s) {
+        values.push(s.value);
+        colors.push(s.color);
     });
 
-    var labels = _.map(slices, function(s){ return s.label });
-    var values = _.map(slices, function(s){ return s.value });
-    var colors = _.map(slices, function(s){ return s.color });
-
     var lbl = undefined;
-
     pie = r.g.piechart(20, 20, 17, values, {
         colors: colors,
         strokewidth: 0
@@ -102,17 +94,61 @@ function minipie(div, data, type) {
     pie.hover(function() {
         this.sector.stop();
         this.sector.scale(1.2, 1.2, this.cx, this.cy);
-        lbl = r.text(30, 50, dollar(this.value.value));
+        lbl = r.text(30, 50, floatToDollars(this.value.value));
         lbl.attr({"font-weight": 800, "font-size": "12px"});
         lbl.show();
-
     }, function() {
         this.sector.animate({scale: [1, 1, this.cx, this.cy]}, 500, "bounce");
         lbl.hide();
     });
+    pie.click(function() {
+        lbl.hide();
+    });
+}
+
+/*
+* Compile a list of parsed transaction names.  Query the chutney API to get
+* corp names. 
+*
+* Arguments:
+*   queryNames: an array of names to query
+*   successCallback(orgs, queryNameToOrgName): a function called on success.
+*       `orgs` is a mapping of {orgName: Org object}
+*       `queryNameToOrgName` is a mapping of
+*           { given query name: resolved orgName }
+*   errorCallback: function called on timeout
+*   fuzzy: if '0', will do exact name searches.  If '1' or absent, do fuzzy
+*          name searches.
+*/
+function queryApi(queryNames, successCallback, errorCallback, fuzzy) {
+    // Other than timeouts, we can't get any indication that a JSONP call has
+    // failed.  Set up a timeout and present an error dialog if we go over.
+    var jsonError = setTimeout(errorCallback, API_TIMEOUT);
+
+    $.getJSON(INFO_SEARCH_URL + "?callback=?", {
+            'q': queryNames.join(","), 
+            'fuzzy': fuzzy == undefined ? '1' : fuzzy,
+        },
+        function(data) {
+            clearTimeout(jsonError);
+            var orgs = {};
+            var queryNameToOrgName = {};
+            var txnameToOrgName = {};
+            for (var i = 0; i < queryNames.length; i++) {
+                var qname = queryNames[i];
+                var corp = data[qname];
+                var orgName = corp ? corp.info.name : qname;
+                if (orgs[orgName] == undefined) {
+                    orgs[orgName] = new Org(corp);
+                }
+                queryNameToOrgName[qname] = orgName;
+            }
+            successCallback(orgs, queryNameToOrgName);
+        }
+    );
 }
 /***************************************************************
-* Transaction objects
+* Transaction and organization objects
 ****************************************************************/
 function Tx(name, amount, date, orig, order) {
     this.name = name;
@@ -139,27 +175,13 @@ Org.prototype = {
                 this.txNames.push(txs[i].name);
             }
         }
-    },
-    txTable: function() {
-        var table_parts = ["<table>"]
-        $.each(this.txs, function(i, tx) {
-            table_parts = table_parts.concat(["<tr>",
-                "<td>", tx.date, "</td>",
-                "<td>", tx.orig, "</td>",
-                "<td>", floatToDollars(tx.amount), "</td>",
-                "</tr>"]);
-        });
-        table_parts.push("</table>");
-        return table_parts.join("");
     }
 }
 
-function mappingIdFor(corp, name) {
-    // a mapping ID is a string representing a unique match between a
-    // corporation and a transaction string, usable for selectors that want to
-    // grab all matching transactions when overriding matches.
-    return (corp ? corp.info.id : "unmatched") + slugify(name);
-}
+/************************************************************
+* Detecting and parsing transactions
+*************************************************************/
+
 function ignorable(tx_string) {
     if (tx_string.search(/(^|\s)(TRANSFER)(?=$|\s)/gi) != -1) {
         return true;
@@ -240,8 +262,8 @@ function autoDetectTxs() {
             if (text.length > 200) {
                 return;
             }
-            // Amounts: They have a "$" symbol, and contain no letters, or at
-            // least follow a %f.02 pattern.
+            // Amounts: They either have a "$" symbol, and contain no letters,
+            // or follow a %f.02 pattern.
             if ((text.search(/\$/) != -1 || text.search(/(^|[^\.])\d+\.\d\d($|\s)/) != -1)
                      && text.search(/a-z/i) == -1) {
                 var f = dollarsToFloat(text);
@@ -317,14 +339,10 @@ function autoDetectTxs() {
 var chutney = {
     txdata: {},
     /*
-    *  Load necessary javascript and css, parse transactions, then query API.
+    *  Load necessary javascript and css
     */
     start: function() {
-        // TODO Do something special if we are launching from the page where
-        // you get the bookmarklet.
-
-        
-        // pull in stylesheets first; give them time to load.
+        // Load css
         if (!scriptsInserted) {
             var head = document.getElementsByTagName("head")[0];
             for (var i = 0; i < stylesheets.length; i++) {
@@ -347,84 +365,125 @@ var chutney = {
         // if jquery-ui isn't loaded, "span.ui-icon" will have default
         // "display: inline", not "display: block".
         if (style == "block") {
-            chutney.run();
+            if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1) {
+                $(document.createElement("div"))
+                    .attr("title", "Chutney bookmarklet")
+                    .html("<p>This is a bookmarklet, not a link &ndash; " +
+                          "to use it, drag that " +
+                          "'chutney' link up to your bookmarks toolbar, or " +
+                          "right-click on it and choose \"Bookmark " +
+                          "this\".</p><br /><p>After adding the bookmarklet, go to a " +
+                          "site with bank transactions and click on it, and you'll " +
+                          "see what those transactions are influencing!</p>")
+                    .dialog({
+                        buttons: {
+                            "Got it": function() {
+                                $(this).dialog("close");
+                                $(this).remove();
+                                return;
+                            }
+                        },
+                        resizable: false,
+                        draggable: false
+                    });
+                return;
+            } else {
+                chutney.run();
+            }
         } else {
             setTimeout(chutney.start, 1000);
         }
     },
     run: function() {
-
-        // parse transactions before mucking with DOM
-        chutney.parseTransactions();
-
-        // muck with DOM
+        // parse transactions before any mucking with the DOM
+        chutney.parseTxs();
+        
+        // Commence DOM mucking.
         chutney.setUpHtml();
-        chutney.recipe();
-        chutney.queryApi();
-    },
-    /*
-    * Compile a list of parsed transaction names.  Query the chutney API to get
-    * corp names.  Display the results.
-    */
-    queryApi: function() {
-        var txdata = chutney.txdata;
-        if (txdata.txs.length == 0) {
-            return;
-        }
-        var names = [];
-        for (var name in txdata.txnames) {
-            if (name.length > 0) {
-                names.push(chutney.getOverride(name));
-            }
-        }
-        // Other than timeouts, we can't get any indication that a JSONP call has
-        // failed.  Set up a timeout and present an error dialog if we go over.
-        var jsonError = setTimeout(function() {
-                chutney.recipeDone = true;
-                var div = $(document.createElement("div"));
-                div.html("Error communicating with server.");
-                div.dialog({
+        if (chutney.txdata.txs.length == 0) {
+            // No transactions found -- display message then exit.
+            $(document.createElement("div"))
+                .attr("title", "No transactions found")
+                .html("<p>Sorry, we couldn't find any transactions on this page.</p>")
+                .dialog({
                     buttons: {
-                        'Try again': function() {
-                            $(this).dialog('close');
-                            chutney.start();
-                        },
-                        'Cancel': function() {
-                            $(this).dialog('close');
+                        shucks: function() {
+                            $(this).dialog("close");
+                            $(this).remove();
+                            chutney.div.dialog("close");
                         }
                     },
-                    modal: true,
-                    zIndex: 10000,
                     resizable: false,
                     draggable: false
                 });
-            }, API_TIMEOUT);
-        $.getJSON(INFO_SEARCH_URL + "?callback=?", {'q': names.join(","), 'fuzzy': '1' },
-            function(data) {
-                clearTimeout(jsonError);
-                chutney.recipeDone = true; // stop the blending
-                var txdata = chutney.txdata;
-
-                var orgs = {};
-                for (var name in txdata.txnames) {
-                    var corp = data[chutney.getOverride(name)];
-                    var orgName = corp ? corp.info.name : name;
-                    if (orgs[orgName] == undefined) {
-                        orgs[orgName] = new Org(corp);
-                    } 
-                    orgs[orgName].addTxs(txdata.txnames[name]);
-                }
-                txdata.orgs = orgs;
-                chutney.show();
+            return;
+        } 
+        chutney.recipe();
+        // Get names for the API query -- map txnames to corp names 
+        var queryNameToTxName = {};
+        // txnames that have been overridden to have no match.
+        var blankedTxNames = [];
+        var queryNames = [];
+        for (var txname in chutney.txdata.txnames) {
+            var qname = chutney.getOverride(txname);
+            if (qname) {
+                queryNameToTxName[qname] = txname;
+                queryNames.push(qname);
+            } else {
+                blankedTxNames.push(qname);
             }
+        }
+        queryApi(queryNames,
+            function(orgs, queryNameToOrgName) {
+                // Success!
+                $.each(queryNameToOrgName, function(queryName, orgName) {
+                    var txname = queryNameToTxName[queryName];
+                    orgs[orgName].addTxs(chutney.txdata.txnames[txname]);
+                });
+                // add explicit blanks
+                $.each(blankedTxNames, function(i, txname) {
+                    orgs[txname] = new Org();
+                    orgs[txname].addTxs(chutney.txdata.txnames[txname]);
+                });
+
+                chutney.txdata.orgs = orgs;
+                chutney.recipeDone = true; // stop the blending
+                $("#chutney .loading").hide();
+                $("#chutney .content").show();
+                chutney.drawTotals();
+                chutney.drawTxs();
+            }, 
+            chutney.apiTimeout
         );
     },
+    apiTimeout: function() {
+        // Error -- timeout                
+        chutney.recipeDone = true;
+        var div = $(document.createElement("div"));
+        div.html("Error communicating with server.");
+        div.dialog({
+            buttons: {
+                'Try again': function() {
+                    $(this).dialog('close');
+                    chutney.start();
+                },
+                'Cancel': function() {
+                    $(this).dialog('close');
+                }
+            },
+            modal: true,
+            zIndex: 10000,
+            resizable: false,
+            draggable: false
+        });
+    },            
     /*
-    *  Create the overlay that we will display things in
+    *  Create the overlay in which we will display things
     */
     setUpHtml: function() {
-        // A queue of functions to execute after we've loaded everything we need to
-        // (e.g. to operate on DOM elements once they've been loaded, such as charts)
+        // A queue of functions to execute after we've loaded everything we
+        // need to (e.g. to operate on DOM elements once they've been loaded,
+        // such as charts)
         chutney.postLoadQueue = [];
         // frameset hack -- remove framesets and add body.
         if ($("frameset").length > 0) {
@@ -477,35 +536,20 @@ var chutney = {
                 resizable: false,
                 title: "Chutney",
                 close: function() {
-                    // rather than trying to rebuild a frameset, just reload the page.
                     if (chutney.frameset) {
+                        // rather than trying to rebuild a frameset, just
+                        // reload the page on close.
                         location.reload(true);
                     }
                 }
             });
         }
-        if (chutney.txdata.txs.length == 0) {
-            $(document.createElement("div"))
-                .attr("title", "No transactions found")
-                .html("<p>Sorry, we couldn't find any transactions on this page.</p>")
-                .dialog({
-                    buttons: {
-                        shucks: function() {
-                            $(this).dialog("close");
-                            $(this).remove();
-                            chutney.div.dialog("close");
-                        }
-                    },
-                    resizable: false,
-                    draggable: false
-                });
-        } else {
-            $(window).scrollTop(0);
-            chutney.div.dialog('open');
-        }
+        $(window).scrollTop(0);
+        chutney.div.dialog('open');
     },
+
     /*
-    * Persist the user-defined overrides as a cookie.
+    * Persist the user-defined overrides.
     */
     getOverride: function(txName) {
         if (chutney._overrides == undefined) {
@@ -544,10 +588,11 @@ var chutney = {
         }
         $.cookie(COOKIE_NAME, escaped.join(";"), { expires: COOKIE_DAYS });
     },
+
     /*
-    *  Pull transactions out of the current page.
+    *  Pull transactions out of the current page; store them in chutney.txdata.
     */
-    parseTransactions: function() {
+    parseTxs: function() {
         var txdata = chutney.txdata;
         txdata.txs = [];
         if (window.location.href.search(/mint\.com/) != -1 ||
@@ -575,8 +620,9 @@ var chutney = {
                 var name = cleanTxName(desc[i]);
                 if (name != null) {
                     txdata.txs.push(new Tx(
-                        cleanTxName(desc[i]),
+                        name,
                         dollarsToFloat(collapseAlt[i]),
+                        // still have to parse for dates though
                         $("#row" + i + " td:eq(2)").text().trim(),
                         desc[i],
                         i
@@ -606,6 +652,9 @@ var chutney = {
             }
         });
     },
+    /**
+     * Redraw and display the whole transaction table.
+     */
     drawTxs: function() {
         var corps = chutney.sortedOrgNames();
         var table = $(document.createElement("table")).attr({
@@ -614,11 +663,11 @@ var chutney = {
         });
         var sortMark = "<span class='ui-icon ui-icon-carat-2-n-s' style='float: left;'></span>";
         table.append(["<tr><th></th>",
-                     "<th onclick='chutney.resortTransactions(\"name\")'>", 
+                     "<th onclick='chutney.sortTransactions(\"name\")'>", 
                         chutney.sortBy == 'name' ? sortMark : '', "Name of Transaction</th>",
-                     "<th onclick='chutney.resortTransactions(\"match\")'>", 
+                     "<th onclick='chutney.sortTransactions(\"match\")'>", 
                         chutney.sortBy == 'match' ? sortMark : '', "Matching organization</th>",
-                     "<th onclick='chutney.resortTransactions(\"amount\")'>", 
+                     "<th onclick='chutney.sortTransactions(\"amount\")'>", 
                         chutney.sortBy == 'amount' ? sortMark : '', 
                         "Amount</th>",
                     "</tr>"].join(""));
@@ -628,57 +677,20 @@ var chutney = {
                         
         $("#chutney .transactions").html(table);
         chutney.setViewMode();
-        chutney.doPostLoadQueue();
+        for (var i = 0; i < chutney.postLoadQueue.length; i++) {
+            chutney.postLoadQueue[i]();
+        }
+        chutney.postLoadQueue = [];
 
     },
-    resortTransactions: function(sortBy) {
-        if (sortBy == chutney.sortBy) {
-            chutney.asc = chutney.asc * (-1);
-        }
-        chutney.sortBy = sortBy;
-        chutney.drawTxs();
-    },
-    sortedOrgNames: function() {
-        if (chutney.asc == undefined) {
-            chutney.asc = 1;
-        }
-        if (chutney.sortBy == undefined) {
-            chutney.sortBy = 'amount';
-        }
-        var corps = [];
-        var sortFunc = {
-            amount: function(a, b) {
-                return chutney.asc * (
-                    chutney.txdata.orgs[a].amount - chutney.txdata.orgs[b].amount
-                );
-            },
-            name: function(a, b) {
-                a = a.toLowerCase();
-                b = b.toLowerCase();
-                return chutney.asc * (a > b ? 1 : a == b ? 0 : -1);
-            },
-            match: function(a, b) {
-                var ca = chutney.txdata.orgs[a].corp;
-                var cb = chutney.txdata.orgs[b].corp;
-                a = (ca ? ca.info.name : a ? a : "").toLowerCase();
-                b = (cb ? cb.info.name : b ? b : "").toLowerCase();
-                return chutney.asc * (a > b ? 1 : a == b ? 0 : -1);
-            }
-        }[chutney.sortBy];
-
-        $.each(chutney.txdata.orgs, function(key, value) { return corps.push(key); });
-        corps.sort(sortFunc);
-        return corps;
-    },
-    /*
-    * Given a list of transactions from a particular business, build rows to
-    * describe the result
-    */
+    /**
+     * Assemble a single row, representing all transactions for a given org.
+     */
     buildTxRow: function(orgName) {
         var org = chutney.txdata.orgs[orgName];
 
         // build tooltip
-        var tx_tooltip = $("<div class='tx-tooltip'>" + org.txTable() + "</div>");
+        var tx_tooltip = $("<div class='tx-tooltip'>" + chutney.orgTxTable(org) + "</div>");
         var tooltipTriggerClass = "tooltip-" + slugify(orgName);
         chutney.postLoadQueue.push(function() {
             $("." + tooltipTriggerClass + " td:eq(1)").hover(function() {
@@ -722,7 +734,7 @@ var chutney = {
             }
             var partyBreakdownId = "party" + org.uniqueClass;
             chutney.postLoadQueue.push(function() {
-                minipie(partyBreakdownId, pb, "party");
+                minipie(partyBreakdownId, pb);
             });
 
             out = ["<tr class='tx matched ", tooltipTriggerClass, " ", org.uniqueClass, "'>",
@@ -775,14 +787,62 @@ var chutney = {
         }
         return out;
     },
-    editMatch: function(orgName, newCorp, editor) {
+    /**
+     * Sorting of transactions
+     */
+    sortTransactions: function(sortBy) {
+        if (sortBy == chutney.sortBy) {
+            chutney.asc = chutney.asc * (-1);
+        }
+        chutney.sortBy = sortBy;
+        chutney.drawTxs();
+    },
+    sortedOrgNames: function() {
+        if (chutney.asc == undefined) {
+            chutney.asc = 1;
+        }
+        if (chutney.sortBy == undefined) {
+            chutney.sortBy = 'amount';
+        }
+        var corps = [];
+        var sortFunc = {
+            amount: function(a, b) {
+                return chutney.asc * (
+                    chutney.txdata.orgs[a].amount - chutney.txdata.orgs[b].amount
+                );
+            },
+            name: function(a, b) {
+                a = a.toLowerCase();
+                b = b.toLowerCase();
+                return chutney.asc * (a > b ? 1 : a == b ? 0 : -1);
+            },
+            match: function(a, b) {
+                var ca = chutney.txdata.orgs[a].corp;
+                var cb = chutney.txdata.orgs[b].corp;
+                a = (ca ? ca.info.name : a ? a : "").toLowerCase();
+                b = (cb ? cb.info.name : b ? b : "").toLowerCase();
+                return chutney.asc * (a > b ? 1 : a == b ? 0 : -1);
+            }
+        }[chutney.sortBy];
+
+        $.each(chutney.txdata.orgs, function(key, value) { return corps.push(key); });
+        corps.sort(sortFunc);
+        return corps;
+    },
+    /**
+     * Change the association between an orgName and a corp.
+     */
+    editMatch: function(oldOrgName, newOrgName, editor) {
         var orgs = chutney.txdata.orgs;
 
-        var setCorp = function(corp) {
+        var setCorp = function(newOrg) {
+            // class names of elements to flash after change
             var flash = [];
-            var oldOrg = orgs[orgName];
-            delete orgs[orgName];
-            if (corp == undefined) {
+
+            var oldOrg = orgs[oldOrgName];
+            delete orgs[oldOrgName];
+            if (newOrg == undefined) {
+                // Split this org out into individual transaction names.
                 $.each(oldOrg.txs, function(i, tx) {
                     if (orgs[tx.name] == undefined) {
                         orgs[tx.name] = new Org();
@@ -791,29 +851,37 @@ var chutney = {
                     flash.push(orgs[tx.name].uniqueClass);
                 });
             } else {
-                if (orgs[newCorp] == undefined) {
-                    oldOrg.corp = corp;
-                    orgs[newCorp] = oldOrg;
+                // Just rename the corp.
+                if (orgs[newOrgName] == undefined) {
+                    // keep the old org, it has the tx's already
+                    oldOrg.corp = newOrg.corp;
+                    orgs[newOrgName] = oldOrg;
                 } else {
-                    orgs[newCorp].addTxs(oldOrg.txs);
+                    // An org with newOrgName already exists.  Add our tx's to it.
+                    orgs[newOrgName].addTxs(oldOrg.txs);
                 }
-                flash.push(orgs[newCorp].uniqueClass);
+                flash.push(orgs[newOrgName].uniqueClass);
             }
+            
+            // Persist the new definitions.
             $.each(oldOrg.txs, function(i, tx) {
-                chutney.setOverride(tx.name, newCorp);
+                chutney.setOverride(tx.name, newOrgName);
             });
 
+            // Refresh UI
             chutney.drawTxs();
             editor.remove();
-
+            chutney.fixOddEvenRows();
             $("#chutney").find(
                 $.map(flash, function(c) { return "." + c; }).join(", ") 
             ).effect("highlight", {}, 3000);
         };
 
-        if (newCorp) {
-            $.getJSON(INFO_SEARCH_URL + "?callback=?", {q: newCorp, fuzzy: 0},
-                function(data) { setCorp(data[newCorp]); }
+        if (newOrgName) {
+            queryApi([newOrgName], 
+                 function(data) { setCorp(data[newOrgName]); },
+                 chutney.apiTimeout,
+                 '0'
             );
         } else {
             setCorp(undefined);
@@ -854,7 +922,7 @@ var chutney = {
                 input,
                 submit,
                 removeMatch,
-                org.txTable()
+                chutney.orgTxTable(org)
             );
         $(editLink).parent().append(editor);
 
@@ -977,15 +1045,29 @@ var chutney = {
             $("#chutney .matched").show();
             $("#chutney .unmatched").show();
         }
-        $("#chutney .transactions tr").removeClass("even");
-        $("#chutney .transactions tr.tx:visible").filter(":even").addClass("even");
-        $("#chutney .transactions tr.even + tr.org").addClass("even");
-        
         // Fix background overlay height to suit our new height.
         $(".ui-widget-overlay").height(Math.max(
             $("body").height(),
             $("#chutney").height() + 100
         ) + "px");
+        chutney.fixOddEvenRows();
+    },
+    fixOddEvenRows: function() {
+        $("#chutney .transactions tr").removeClass("even");
+        $("#chutney .transactions tr.tx:visible").filter(":even").addClass("even");
+        $("#chutney .transactions tr.even + tr.org").addClass("even");
+    },
+    orgTxTable: function(org) {
+        var table_parts = ["<table>"]
+        $.each(org.txs, function(i, tx) {
+            table_parts = table_parts.concat(["<tr>",
+                "<td>", tx.date, "</td>",
+                "<td>", tx.orig, "</td>",
+                "<td>", floatToDollars(tx.amount), "</td>",
+                "</tr>"]);
+        });
+        table_parts.push("</table>");
+        return table_parts.join("");
     },
     drawTotals: function() {
         var totalMatched = 0;
@@ -1003,19 +1085,6 @@ var chutney = {
 
 
     },
-    doPostLoadQueue: function() {
-        for (var i = 0; i < chutney.postLoadQueue.length; i++) {
-            chutney.postLoadQueue[i]();
-        }
-        chutney.postLoadQueue = [];
-    },
-    show: function() {
-        $("#chutney .loading").hide();
-        $("#chutney .content").show();
-        chutney.drawTotals();
-        chutney.drawTxs();
-        //chutney._fixOffset(); // one more time...
-    }
 }
 
 window.chutney = chutney;

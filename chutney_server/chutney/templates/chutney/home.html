@@ -5,7 +5,7 @@
 if (!window.chutney) {
     if (!window.chutneyInserted) {
         var s = document.createElement("script"); 
-        s.src = "{{ SERVER_URL }}{{ MEDIA_URL }}js/chutney.js"; 
+        s.src = "{{ SERVER_URL }}{% url chutney.js %}"; 
         document.getElementsByTagName("head")[0].appendChild(s); 
         window.chutneyInserted = true;
     }
