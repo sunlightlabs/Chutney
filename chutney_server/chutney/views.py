@@ -15,8 +15,8 @@ def _json_response(request, json):
         content_type = "text/javascript"
     else:
         result = json
-        content_type = "text/html" # for debug in browser
-        #content_type = "application/json"
+        #content_type = "text/html" # for debug in browser
+        content_type = "application/json"
     return HttpResponse(result, content_type=content_type)
 
 def org_info(request):
@@ -66,8 +66,8 @@ def name_search(request):
 def assemble_js(request):
     """ 
     Assemble all needed javascript in order.  IE and Chrome don't reliably
-    parse cross-script dependencies in dynamic script insertions, so we make
-    the insertions static. 
+    parse dynamic script insertions in order, so we construct a single js to
+    insert.
     """
     root = "%sjs/" % (settings.MEDIA_ROOT)
     js = [
@@ -81,11 +81,11 @@ def assemble_js(request):
     ]
 
     out = StringIO()
-    out.write("var CHUTNEY_SERVER_URL = '%s';" % settings.SERVER_URL);
-    out.write("var CHUTNEY_BRISKET_URL = '%s';" % settings.BRISKET_URL);
-    out.write("var CHUTNEY_MEDIA_URL = '%s%s';" % (settings.SERVER_URL, settings.MEDIA_URL));
+    out.write("var CHUTNEY_SERVER_URL = '%s';" % settings.SERVER_URL)
+    out.write("var CHUTNEY_BRISKET_URL = '%s';" % settings.BRISKET_URL)
+    out.write("var CHUTNEY_MEDIA_URL = '%s';" % settings.MEDIA_URL)
     for filename in js:
-        print "... adding", filename
+        #print "... adding", filename
         if filename.startswith("http"):
             fh = urllib2.urlopen(filename)
             out.write(fh.read())

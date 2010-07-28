@@ -178,7 +178,7 @@ class Api(object):
             data = self.pool.get_url(path, params).data
             cache.set(cache_key, data)
 
-        print(cache_key, bool(cached))
+        #print(cache_key, bool(cached))
 
         results = simplejson.loads(data)
         return self.remove_unicode(results)

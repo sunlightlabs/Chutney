@@ -190,14 +190,13 @@ function ignorable(tx_string) {
 }
 
 function cleanTxName(orig) {
-    // Take a typical ugly transaction string, nand turn it into a few words
+    // Take a typical ugly transaction string, and turn it into a few words
     // that are likely to match the corporation name.
-    var string = orig;
-    
     // 0. Early outs for things we shouldn't bother with.
     if (ignorable(orig)) {
         return null;
     }
+    var string = orig;
     // 1. Remove HTML tags
     var tmp = document.createElement("div");
     tmp.innerHTML = string;
