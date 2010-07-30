@@ -26,8 +26,7 @@ from django.core.cache import cache
 from django.utils import simplejson
 
 class CorpMatcher(object):
-    TOP_10000_PATH = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "Top10000List.csv"))
+    TOP_10000_PATH = settings.ORG_NAME_FILE
     N_GRAPHS = 4
     shortcuts = {
             "ACLU": "American Civil Liberties Union",
@@ -40,6 +39,7 @@ class CorpMatcher(object):
             "BANANA REPUBLIC": "Gap Inc",
             "BKOFAMERICA": "Bank of America",
             "BP": "BP",
+            "CHECK": None,
             "CHEVRON": "Chevron Corp",
             "CHILI S": "Brinker International",
             "COSTCO": "Costco Wholesale",
@@ -80,11 +80,14 @@ class CorpMatcher(object):
 
     def __init__(self):
         corps = {}
+        eids = {}
         with open(self.TOP_10000_PATH) as fh:
-            reader = csv.reader(fh, delimiter="\t")
-            for row in itertools.islice(reader, 1, None):
-                corp = row[3] or row[1]
-                corps[self.clean(corp)] = corp
+            reader = csv.reader(fh)
+            for eid, corp, amount in reader:
+                clean = self.clean(corp)
+                corps[clean] = corp
+                eids[corp] = eid
+        self.eids = eids
         self.corps = corps
 
         self.matches = {}
