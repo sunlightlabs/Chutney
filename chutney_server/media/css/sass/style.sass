@@ -17,14 +17,27 @@ body.chutney
 
 .ui-widget-overlay
   +clearfix
+
+#chutney, #chutney td
+  font-family: "Helvetica Neue", Arial, helvetica, sans-serif 
+  font-size: 13px
+  line-height: 1.5em
+  border: none
+
+
+/* NOTE: We need to protect ourselves from name collisions in two ways.  First,
+ * we want to avoid polluting the page in which we're running with definitions
+ * that mess it up when chutney is closed -- thus, we run everything under the
+ * #chutney namespace (with the exception of .ui-dialog which runs over
+ * div#chutney, and body.chutney which we only create in frameset pages).
+ * Second, we want to avoid our own definitions getting screwed up by generic
+ * names that are defined by the page we're on (e.g. '.transactions').  Thus,
+ * we prefix every class name with 'chutney-'.
+ */
   
 #chutney
   // Basics
-  //font-family: Cambria, Georgia, Times, "Times New Roman", serif
   overflow: visible
-  font-family: "Helvetica Neue", Arial, helvetica, sans-serif 
-  font-size: 10pt
-  line-height: 1.5em
   h1, h2, h3, h4, h5, h6
     margin-left: -0.5em
     font-size: 1.8em
@@ -44,21 +57,21 @@ body.chutney
   p
     margin-top: 1.5em
     margin-bottom: 1.5em
-  .mono
-    font-family: monospace
   small
     font-size: 0.8em
   strong
     font-weight: bold
+  li
+    list-style-type: none
 
   // About
-  .about 
+  .chutney-about 
     font-style: italic
     color: #999
 
   // View mode
 
-  .viewmode
+  .chutney-viewmode
     +clearfix
     background-color: #eee
     padding: 0.5em
@@ -75,11 +88,10 @@ body.chutney
       li
         margin-left: 1em
         float: left
-        list-style-type: none
 
   // Transactions
 
-  table.transactions
+  table.chutney-transactions
     border-collapse: collapse
     th
       text-transform: uppercase
@@ -98,31 +110,42 @@ body.chutney
       width: 40%
     td + td + td + td
       width: 14%
-    tr.tx
-      a.editlink, a.editlink:visited
+    tr.chutney-tx
+      a.chutney-editlink, a.chutney-editlink:visited
         margin-left: 1em
         color: #999
-    tr.org, tr.org a, tr.org a:visited
+    tr.chutney-org, tr.chutney-org a, tr.chutney-org a:visited
       color: #333
-    tr.unmatched
+    tr.chutney-unmatched, tr.chutney-unmatched a, tr.chutney-unmatched a:visited
       color: #999
-    tr.even
+    tr.chutney-even
       background-color: #eee
 
-  .tx-tooltip
-    background-color: black
-    color: #ddd
-    opacity: 0.85
-    //border: 1px solid #DDD
+    td.chutney-name
+      cursor: pointer
+    td.chutney-name a
+      display: block
+      float: left
+      text-decoration: none
+    td.chutney-name a:hover
+      text-decoration: underline
+    td.chutney-name span
+      float: left
+      
+
+  .chutney-tx-tooltip
+    background: white
+    border: 1px solid #DDD
     position: absolute
     z-index: 5
-    padding: 0.2em
+    padding: 1em
+    padding-top: 1.5em
     td
-      color: white 
       font-weight: normal
     td + td
       padding-left: 0.5em
-  .editor
+
+  .chutney-editor
     color: #333
     background-color: white
     border: 1px dotted gray
@@ -131,23 +154,21 @@ body.chutney
     padding-top: 1.5em
     text-align: center
     width: 50%
-    input.bad-name
+    input.chutney-bad-name
       background-color: pink
       z-index: 1000
     table
       font-size: smaller
       width: 100%
       td
+        border: 1px dotted #EEE
         width: 15%
       td + td
         width: 70%
       td + td + td
         width: 15%
 
-  div.party-breakdown
+  div.chutney-party-breakdown
     width: 70px
     height: 60px
     float: left
-    cursor: pointer
-
-

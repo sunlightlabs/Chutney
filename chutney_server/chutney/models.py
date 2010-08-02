@@ -157,7 +157,7 @@ class Api(object):
     """
     Class encapsulating Transparency Data API calls.
     """
-    DEFAULT_CYCLE = "-1"
+    DEFAULT_CYCLE = settings.ELECTION_CYCLE
     def __init__(self):
         self.api_url = urlparse(settings.AGGREGATES_API_BASE_URL)
         self.pool = urllib3.connection_from_url(settings.AGGREGATES_API_BASE_URL)
