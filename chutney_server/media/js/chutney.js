@@ -429,7 +429,7 @@ var chutney = {
                 queryNameToTxName[qname] = txname;
                 queryNames.push(qname);
             } else {
-                blankedTxNames.push(qname);
+                blankedTxNames.push(txname);
             }
         }
         queryApi(queryNames,
