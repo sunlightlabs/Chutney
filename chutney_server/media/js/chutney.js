@@ -11,8 +11,8 @@ var NAME_SEARCH_URL = CHUTNEY_SERVER_URL + "/names.json"
 var API_TIMEOUT = 30 * 1000; // milliseconds
 
 var stylesheets = [
-    "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/south-street/jquery-ui.css",
-    CHUTNEY_MEDIA_URL + "/css/style.css"
+    CHUTNEY_MEDIA_URL + "css/jquery-ui.css",
+    CHUTNEY_MEDIA_URL + "css/style.css"
 ];
 var COOKIE_NAME = "chutney";
 var COOKIE_DAYS = 365;
