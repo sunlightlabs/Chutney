@@ -11,7 +11,7 @@ var NAME_SEARCH_URL = CHUTNEY_SERVER_URL + "/names.json"
 var API_TIMEOUT = 30 * 1000; // milliseconds
 
 var stylesheets = [
-    CHUTNEY_MEDIA_URL + "css/jquery-ui.css",
+    CHUTNEY_MEDIA_URL + "css/south-street/jquery-ui-1.8.4.custom.css",
     CHUTNEY_MEDIA_URL + "css/style.css"
 ];
 var COOKIE_NAME = "chutney";
