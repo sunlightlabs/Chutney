@@ -87,4 +87,4 @@ INSTALLED_APPS = (
 )
 CACHE_BACKEND = "locmem://"
 CACHE_PREFIX = "chutney"
-ORG_NAME_FILE = "data/top10000.csv"
+ORG_NAME_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "data", "top10000.csv"))
