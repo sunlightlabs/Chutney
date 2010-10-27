@@ -82,9 +82,9 @@ def assemble_js(request):
 
     out = StringIO()
     out.write("var CHUTNEY_ELECTION_CYCLE = %i;" % settings.ELECTION_CYCLE)
-    out.write("var CHUTNEY_SERVER_URL = '%s';" % settings.SERVER_URL)
-    out.write("var CHUTNEY_BRISKET_URL = '%s';" % settings.BRISKET_URL)
-    out.write("var CHUTNEY_MEDIA_URL = '%s';" % settings.MEDIA_URL)
+    out.write("var CHUTNEY_SERVER_URL = 'https://%s/';" % request.META['HTTP_HOST'])
+    out.write("var CHUTNEY_BRISKET_URL = 'https://%s/media/';" % request.META['HTTP_HOST'])
+    out.write("var CHUTNEY_MEDIA_URL = 'https://';" % settings.MEDIA_URL)
     for filename in js:
         #print "... adding", filename
         if filename.startswith("http"):
