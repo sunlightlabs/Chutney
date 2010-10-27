@@ -329,7 +329,7 @@ function autoDetectTxs() {
                 var numCount = 0;
                 for (var i = 0; i < parts.length; i++) {
                     try {
-                        var num = parseInt(parts[i]);
+                        var num = parseInt(parts[i], 10); // force base-10, otherwise zero-prefixed days will be assumed to be octal
                         if (num < 1 || (num > 31 && num < 1980) || (num > 2100)) {
                             badNum = true;
                             break;
