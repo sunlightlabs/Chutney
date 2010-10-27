@@ -97,3 +97,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 CACHE_BACKEND = "locmem://"
 CACHE_PREFIX = "chutney"
 ORG_NAME_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "data", "top10000.csv"))
+
+# Base URL for links out to entities
+BRISKET_URL = "http://beta.influenceexplorer.com"
+# Transparency data API base URL
+AGGREGATES_API_BASE_URL = "http://transparencydata.com/api/1.0/"
+
+try:
+    from local_settings import *
+except:
+    pass

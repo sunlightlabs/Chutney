@@ -1,5 +1,5 @@
 *.pyc
 *.swp
 .sass-cache
-settings.py
+local_settings.py
 test_files/*
