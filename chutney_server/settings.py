@@ -85,6 +85,27 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     'chutney',
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.request',
+    'django.core.context_processors.media',
+)
+
 CACHE_BACKEND = "locmem://"
 CACHE_PREFIX = "chutney"
 ORG_NAME_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "data", "top10000.csv"))
+
+# Base URL for links out to entities
+BRISKET_URL = "http://influenceexplorer.com"
+# Transparency data API base URL
+AGGREGATES_API_BASE_URL = "http://transparencydata.com/api/1.0/"
+
+FORCE_HTTPS = True
+
+try:
+    from local_settings import *
+except:
+    pass

@@ -284,13 +284,11 @@ function autoDetectTxs() {
     // rules.
     var txParams = [];
     // Parse all frames if we are in a frameset.
-    var docs = [];
+    var docs = [window.document];
     if (window.frames && window.frames.length > 0) {
         for (var i = 0; i < window.frames.length; i++) {
             docs.push(window.frames[i].document);
         }
-    } else {
-        docs.push(window.document);
     }
 
     $(docs).find("tr").each(function(index) {
@@ -329,7 +327,7 @@ function autoDetectTxs() {
                 var numCount = 0;
                 for (var i = 0; i < parts.length; i++) {
                     try {
-                        var num = parseInt(parts[i]);
+                        var num = parseInt(parts[i], 10); // force base-10, otherwise zero-prefixed days will be assumed to be octal
                         if (num < 1 || (num > 31 && num < 1980) || (num > 2100)) {
                             badNum = true;
                             break;
