@@ -284,13 +284,11 @@ function autoDetectTxs() {
     // rules.
     var txParams = [];
     // Parse all frames if we are in a frameset.
-    var docs = [];
+    var docs = [window.document];
     if (window.frames && window.frames.length > 0) {
         for (var i = 0; i < window.frames.length; i++) {
             docs.push(window.frames[i].document);
         }
-    } else {
-        docs.push(window.document);
     }
 
     $(docs).find("tr").each(function(index) {
