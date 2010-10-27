@@ -1,22 +1,36 @@
+/*
+ * YUI Resect CSS version: 2.2.2 
+ * Copyright (c) 2007, Yahoo! Inc. All rights reserved.
+ * Licensed under the BSD License: http://developer.yahoo.net/yui/license.txt
+ */
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,optgroup,button,p,blockquote,th,td{margin:0;padding:0;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}table{border-collapse:collapse;border-spacing:0;}caption,th{text-align:left;}ol,ul{list-style:none;}fieldset,img{border:0;}input,textarea,select,optgroup,option,button{font-family:inherit;font-size:100%;}button,input {width: auto;overflow: visible;}optgroup,address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym {border:0;}
+dl li{list-style: none;}
+
+
+#chutney {
+    color: #666666;
+    font-size: 82%;
+    line-height: 20px;
+    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+
+#chutney p { margin-bottom: 1em; }
+
+#chutney h2 { font-size: 220%; text-transform: uppercase; color: #000000; margin-bottom: 20px;}
+#chutney h3 { font-weight: bold; color: #3b3130; text-transform: uppercase; font-size: 160%; line-height: 25px; margin-bottom: 25px;}
+
+#chutney .radio { width: 15px; margin-right: 10px; }
+#chutney .percent { color: #989393; font-style: oblique; font-family: Georgia, "Times New Roman", Times, serif;}
+#chutney .clear { clear: both;}
+
+#chutney .chutney-even { background-color: #F5F4F4; }
+
 /* line 4, ././style.sass */
 .ui-dialog, .ui-autocomplete {
   font-size: 10pt;
   overflow: visible;
 }
-/* line 38, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-.ui-dialog div, .ui-dialog span, .ui-dialog object, .ui-dialog iframe, .ui-dialog h1, .ui-dialog h2, .ui-dialog h3, .ui-dialog h4, .ui-dialog h5, .ui-dialog h6, .ui-dialog p,
-.ui-dialog pre, .ui-dialog a, .ui-dialog abbr, .ui-dialog acronym, .ui-dialog address, .ui-dialog code, .ui-dialog del, .ui-dialog dfn, .ui-dialog em, .ui-dialog img,
-.ui-dialog dl, .ui-dialog dt, .ui-dialog dd, .ui-dialog ol, .ui-dialog ul, .ui-dialog li, .ui-dialog fieldset, .ui-dialog form, .ui-dialog label, .ui-dialog legend, .ui-dialog caption, .ui-dialog tbody, .ui-dialog tfoot, .ui-dialog thead, .ui-dialog tr, .ui-autocomplete div, .ui-autocomplete span, .ui-autocomplete object, .ui-autocomplete iframe, .ui-autocomplete h1, .ui-autocomplete h2, .ui-autocomplete h3, .ui-autocomplete h4, .ui-autocomplete h5, .ui-autocomplete h6, .ui-autocomplete p, .ui-autocomplete pre, .ui-autocomplete a, .ui-autocomplete abbr, .ui-autocomplete acronym, .ui-autocomplete address, .ui-autocomplete code, .ui-autocomplete del, .ui-autocomplete dfn, .ui-autocomplete em, .ui-autocomplete img, .ui-autocomplete dl, .ui-autocomplete dt, .ui-autocomplete dd, .ui-autocomplete ol, .ui-autocomplete ul, .ui-autocomplete li, .ui-autocomplete fieldset, .ui-autocomplete form, .ui-autocomplete label, .ui-autocomplete legend, .ui-autocomplete caption, .ui-autocomplete tbody, .ui-autocomplete tfoot, .ui-autocomplete thead, .ui-autocomplete tr {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  font-weight: inherit;
-  font-style: inherit;
-  font-size: 100%;
-  font-family: inherit;
-  vertical-align: baseline;
-}
+
 /* line 41, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
 .ui-dialog table, .ui-autocomplete table {
   border-collapse: separate;
@@ -85,38 +99,15 @@ body.chutney {
   overflow: visible;
 }
 /* line 41, ././style.sass */
-#chutney h1, #chutney h2, #chutney h3, #chutney h4, #chutney h5, #chutney h6 {
+#chutney h3, #chutney h4, #chutney h5, #chutney h6 {
   margin-left: -0.5em;
   font-size: 1.8em;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   font-weight: bold;
 }
-/* line 47, ././style.sass */
-#chutney h2 {
-  font-size: 1.4em;
-}
-/* line 49, ././style.sass */
-#chutney h3 {
-  font-size: 1.2em;
-}
-/* line 51, ././style.sass */
-#chutney h4 {
-  font-size: 1em;
-}
-/* line 53, ././style.sass */
-#chutney h5 {
-  font-size: 0.8em;
-}
-/* line 55, ././style.sass */
-#chutney h6 {
-  font-size: 0.6em;
-}
-/* line 57, ././style.sass */
-#chutney p {
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-}
+
+
 /* line 60, ././style.sass */
 #chutney small {
   font-size: 0.8em;
@@ -134,49 +125,19 @@ body.chutney {
   font-style: italic;
   color: #999999;
 }
-/* line 74, ././style.sass */
-#chutney .chutney-viewmode {
-  overflow: hidden;
-  display: inline-block;
-  background-color: #eeeeee;
-  padding: 0.5em;
-  margin-bottom: 1em;
-}
-/* line 8, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/utilities/general/./_hacks.scss */
-#chutney .chutney-viewmode {
-  display: block;
-}
-/* line 79, ././style.sass */
-#chutney .chutney-viewmode h2 {
-  float: left;
-  margin: 0;
-  padding: 0;
-}
-/* line 83, ././style.sass */
-#chutney .chutney-viewmode ul {
-  margin: 0;
-  padding: 0;
-  font-weight: normal;
-  float: left;
-}
-/* line 88, ././style.sass */
-#chutney .chutney-viewmode ul li {
-  margin-left: 1em;
-  float: left;
-}
+
+#chutney .chutney-viewmode { display: block; background-color: #DCE6E0; padding: 10px 20px; margin-bottom: 30px; }
+#chutney #filterTitle { float: left; margin-right: 25px; font-weight: bold;}
+#chutney .chutney-viewmode ul { float: left; }
+#chutney .chutney-viewmode ul li { margin-left: 25px; float: left; }
+
 /* line 94, ././style.sass */
 #chutney table.chutney-transactions {
   border-collapse: collapse;
 }
-/* line 96, ././style.sass */
-#chutney table.chutney-transactions th {
-  text-transform: uppercase;
-  text-align: left;
-  font-weight: normal;
-  font-size: larger;
-  cursor: pointer;
-}
-/* line 102, ././style.sass */
+
+#chutney th { color: #585352; font-weight: bold; padding-bottom: 5px; text-transform: uppercase;}
+
 #chutney table.chutney-transactions td {
   vertical-align: top;
   width: 1%;
@@ -208,10 +169,7 @@ body.chutney {
 #chutney table.chutney-transactions tr.chutney-unmatched, #chutney table.chutney-transactions tr.chutney-unmatched a, #chutney table.chutney-transactions tr.chutney-unmatched a:visited {
   color: #999999;
 }
-/* line 121, ././style.sass */
-#chutney table.chutney-transactions tr.chutney-even {
-  background-color: #eeeeee;
-}
+
 /* line 124, ././style.sass */
 #chutney table.chutney-transactions td.chutney-name {
   cursor: pointer;
@@ -239,15 +197,15 @@ body.chutney {
   padding: 1em;
   padding-top: 1.5em;
 }
-/* line 143, ././style.sass */
+
 #chutney .chutney-tx-tooltip td {
   font-weight: normal;
 }
-/* line 145, ././style.sass */
+
 #chutney .chutney-tx-tooltip td + td {
   padding-left: 0.5em;
 }
-/* line 148, ././style.sass */
+
 #chutney .chutney-editor {
   color: #333333;
   background-color: white;
@@ -258,30 +216,30 @@ body.chutney {
   text-align: center;
   width: 50%;
 }
-/* line 157, ././style.sass */
+
 #chutney .chutney-editor input.chutney-bad-name {
   background-color: pink;
   z-index: 1000;
 }
-/* line 160, ././style.sass */
+
 #chutney .chutney-editor table {
   font-size: smaller;
   width: 100%;
 }
-/* line 163, ././style.sass */
+
 #chutney .chutney-editor table td {
   border: 1px dotted #eeeeee;
   width: 15%;
 }
-/* line 166, ././style.sass */
+
 #chutney .chutney-editor table td + td {
   width: 70%;
 }
-/* line 168, ././style.sass */
+
 #chutney .chutney-editor table td + td + td {
   width: 15%;
 }
-/* line 171, ././style.sass */
+
 #chutney div.chutney-party-breakdown {
   width: 70px;
   height: 60px;
