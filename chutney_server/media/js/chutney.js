@@ -301,7 +301,7 @@ function autoDetectTxs() {
             // Amounts: They either have a "$" symbol, and contain no letters,
             // or follow a %f.02 pattern.
             if ((text.search(/\$/) != -1 || text.search(/(^|[^\.])\d+\.\d\d($|\s)/) != -1)
-                     && text.search(/a-z/i) == -1) {
+                     && text.search(/a-z/i) == -1 && text != '$') {
                 var f = dollarsToFloat(text);
                 if (params.amount == undefined || f < params.amount) {
                     params.amount = f;
