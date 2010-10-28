@@ -291,78 +291,84 @@ function autoDetectTxs() {
         }
     }
 
-    $(docs).find("tr").each(function(index) {
-        var params = {};
-        $(this).children("td").each(function() {
-            var text = $(this).text().replace(/<[\w\/]+>/, "").trim();
-            if (text.length > 200) {
-                return;
-            }
-            // Amounts: They either have a "$" symbol, and contain no letters,
-            // or follow a %f.02 pattern.
-            if ((text.search(/\$/) != -1 || text.search(/(^|[^\.])\d+\.\d\d($|\s)/) != -1)
-                     && text.search(/a-z/i) == -1 && text != '$') {
-                var f = dollarsToFloat(text);
-                if (params.amount == undefined || f < params.amount) {
-                    params.amount = f;
-                }
-                return;
-            }
-            // Dates: they either contain a textual month name, or are composed
-            // only of numbers in valid date ranges and joining chars such as
-            // "-" and "/".
-            var pot_date;
-            if (text.search(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i) != -1 && 
-                        text.replace(/\s/g, "").length <= "September30,2010".length) {
-                pot_date = text;
-            } else if (text.search(/[^-0-9\/\s]/) == -1 && 
-                        text.replace(/[^0-9]/g, "").length <= "20100530".length) {
-                pot_date = text;
-            }
-            if (pot_date) {
-                // Loop through numbers, and ensure that each one present is in
-                // a valid range.
-                var parts = pot_date.split(/[^0-9]/);
-                var badNum = false;
-                var numCount = 0;
-                for (var i = 0; i < parts.length; i++) {
-                    try {
-                        var num = parseInt(parts[i], 10); // force base-10, otherwise zero-prefixed days will be assumed to be octal
-                        if (num < 1 || (num > 31 && num < 1980) || (num > 2100)) {
-                            badNum = true;
-                            break;
-                        } else if (!isNaN(num)) {
-                            numCount += 1;
-                        }
-                    } catch(err) {
-                        continue;
-                    }
-                }
-                if (!badNum && numCount > 0) {
-                    var trimmed = text.trim();
-                    if (trimmed) {
-                        params.date = trimmed;
-                    }
-                }
-                return;
-            }
-            // Transaction strings: They're between 5 and 100 characters long,
-            // and contain at least one number.
-            var textOptions = [text, $(this).attr("title")];
-            for (var i = 0; i < textOptions.length; i++) {
-                var str = textOptions[i];
-                if (str.length > 5 && str.length < 100 && str.search(/[0-9]/) != -1) {
-                    params.orig = str;
+    $(docs).find('table').each(function() {
+        var descIndex = $(this).find('tr:has(th)').eq(0).children(':contains(Description)').index();
+        $(this).find("tr").each(function(index) {
+            var params = {};
+            $(this).children("td").each(function() {
+                var text = $(this).text().replace(/<[\w\/]+>/, "").trim();
+                if (text.length > 200) {
                     return;
+                }
+                // Amounts: They either have a "$" symbol, and contain no letters,
+                // or follow a %f.02 pattern.
+                if ((text.search(/\$/) != -1 || text.search(/(^|[^\.])\d+\.\d\d($|\s)/) != -1)
+                         && text.search(/a-z/i) == -1 && text != '$') {
+                    var f = dollarsToFloat(text);
+                    if (params.amount == undefined || f < params.amount) {
+                        params.amount = f;
+                    }
+                    return;
+                }
+                // Dates: they either contain a textual month name, or are composed
+                // only of numbers in valid date ranges and joining chars such as
+                // "-" and "/".
+                var pot_date;
+                if (text.search(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i) != -1 && 
+                            text.replace(/\s/g, "").length <= "September30,2010".length) {
+                    pot_date = text;
+                } else if (text.search(/[^-0-9\/\s]/) == -1 && 
+                            text.replace(/[^0-9]/g, "").length <= "20100530".length) {
+                    pot_date = text;
+                }
+                if (pot_date) {
+                    // Loop through numbers, and ensure that each one present is in
+                    // a valid range.
+                    var parts = pot_date.split(/[^0-9]/);
+                    var badNum = false;
+                    var numCount = 0;
+                    for (var i = 0; i < parts.length; i++) {
+                        try {
+                            var num = parseInt(parts[i], 10); // force base-10, otherwise zero-prefixed days will be assumed to be octal
+                            if (num < 1 || (num > 31 && num < 1980) || (num > 2100)) {
+                                badNum = true;
+                                break;
+                            } else if (!isNaN(num)) {
+                                numCount += 1;
+                            }
+                        } catch(err) {
+                            continue;
+                        }
+                    }
+                    if (!badNum && numCount > 0) {
+                        var trimmed = text.trim();
+                        if (trimmed) {
+                            params.date = trimmed;
+                        }
+                    }
+                    return;
+                }
+                // Transaction strings: They're between 5 and 100 characters long,
+                // and (contain at least one number OR they're in a field with class
+                // 'desc' OR they're in a column with a title containing the word
+                // 'Description')
+                var $this = $(this);
+                var textOptions = [text, $this.attr("title")];
+                for (var i = 0; i < textOptions.length; i++) {
+                    var str = textOptions[i];
+                    if (str.length > 5 && str.length < 100 && (str.search(/[0-9]/) != -1 || $this.hasClass('desc') || $this.index() == descIndex)) {
+                        params.orig = str;
+                        return;
+                    }
+                }
+            });
+            if (params.date && params.amount && params.orig) {
+                params.name = cleanTxName(params.orig);
+                if (params.name) {
+                    txParams.push(params);
                 }
             }
         });
-        if (params.date && params.amount && params.orig) {
-            params.name = cleanTxName(params.orig);
-            if (params.name) {
-                txParams.push(params);
-            }
-        }
     });
     return txParams;
 }
