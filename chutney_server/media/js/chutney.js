@@ -582,6 +582,13 @@ var chutney = {
                     }
                 }
             });
+            // hack to hide other things that may be covering up our dialog
+            $('[style*=z-index]').not('.ui-dialog,.ui-widget-overlay').each(function() {
+                var $this = $(this);
+                if (parseInt($this.css('z-index')) >= 1002) {
+                    $this.css('z-index', 1001);
+                }
+            })
         }
         $(window).scrollTop(0);
         chutney.div.dialog('open');
