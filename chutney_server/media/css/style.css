@@ -3,11 +3,11 @@
  * Copyright (c) 2007, Yahoo! Inc. All rights reserved.
  * Licensed under the BSD License: http://developer.yahoo.net/yui/license.txt
  */
-.ui-dialog div,.ui-dialog dl,.ui-dialog dt,.ui-dialog dd,.ui-dialog ul,.ui-dialog ol,.ui-dialog li,.ui-dialog h1,.ui-dialog h2,.ui-dialog h3,.ui-dialog h4,.ui-dialog h5,.ui-dialog h6,.ui-dialog pre,.ui-dialog form,.ui-dialog fieldset,.ui-dialog input,.ui-dialog textarea,.ui-dialog optgroup,.ui-dialog button,.ui-dialog p,.ui-dialog blockquote,.ui-dialog th,.ui-dialog td{margin:0;padding:0;}.ui-dialog h1,.ui-dialog h2,.ui-dialog h3,.ui-dialog h4,.ui-dialog h5,.ui-dialog h6{font-size:100%;font-weight:normal;}.ui-dialog table{border-collapse:collapse;border-spacing:0;}.ui-dialog caption,.ui-dialog th{text-align:left;}.ui-dialog ol,.ui-dialog ul{list-style:none;}.ui-dialog fieldset,.ui-dialog img{border:0;}.ui-dialog input,.ui-dialog textarea,.ui-dialog select,.ui-dialog optgroup,.ui-dialog option,.ui-dialog button{font-family:inherit;font-size:100%;}.ui-dialog button,.ui-dialog input {width: auto;overflow: visible;}.ui-dialog optgroup,.ui-dialog address,.ui-dialog caption,.ui-dialog cite,.ui-dialog code,.ui-dialog dfn,.ui-dialog em,.ui-dialog strong,.ui-dialog th,.ui-dialog var{font-style:normal;font-weight:normal;}.ui-dialog q:before,.ui-dialog q:after{content:'';}.ui-dialog abbr,.ui-dialog acronym {border:0;}
-.ui-dialog dl li{list-style: none;}
+.chutney-dialog div,.chutney-dialog dl,.chutney-dialog dt,.chutney-dialog dd,.chutney-dialog ul,.chutney-dialog ol,.chutney-dialog li,.chutney-dialog h1,.chutney-dialog h2,.chutney-dialog h3,.chutney-dialog h4,.chutney-dialog h5,.chutney-dialog h6,.chutney-dialog pre,.chutney-dialog form,.chutney-dialog fieldset,.chutney-dialog input,.chutney-dialog textarea,.chutney-dialog optgroup,.chutney-dialog button,.chutney-dialog p,.chutney-dialog blockquote,.chutney-dialog th,.chutney-dialog td{margin:0;padding:0;}.chutney-dialog h1,.chutney-dialog h2,.chutney-dialog h3,.chutney-dialog h4,.chutney-dialog h5,.chutney-dialog h6{font-size:100%;font-weight:normal;}.chutney-dialog table{border-collapse:collapse;border-spacing:0;}.chutney-dialog caption,.chutney-dialog th{text-align:left;}.chutney-dialog ol,.chutney-dialog ul{list-style:none;}.chutney-dialog fieldset,.chutney-dialog img{border:0;}.chutney-dialog input,.chutney-dialog textarea,.chutney-dialog select,.chutney-dialog optgroup,.chutney-dialog option,.chutney-dialog button{font-family:inherit;font-size:100%;}.chutney-dialog button,.chutney-dialog input {width: auto;overflow: visible;}.chutney-dialog optgroup,.chutney-dialog address,.chutney-dialog caption,.chutney-dialog cite,.chutney-dialog code,.chutney-dialog dfn,.chutney-dialog em,.chutney-dialog strong,.chutney-dialog th,.chutney-dialog var{font-style:normal;font-weight:normal;}.chutney-dialog q:before,.chutney-dialog q:after{content:'';}.chutney-dialog abbr,.chutney-dialog acronym {border:0;}
+.chutney-dialog dl li{list-style: none;}
 
 
-#chutney {
+.chutney-dialog, #chutney {
     color: #666666;
     font-size: 82%;
     line-height: 20px;
@@ -28,34 +28,28 @@
 
 #chutney input { margin: auto; }
 
-/* line 4, ././style.sass */
-.ui-dialog, .ui-autocomplete {
-  font-size: 10pt;
-  overflow: visible;
-}
+.chutney-dialog { background: #f5f3e5; padding: 10px; font-size: 10pt; overflow: visible; text-align: left; }
 
-/* line 41, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-.ui-dialog table, .ui-autocomplete table {
+.chutney-dialog table, .chutney-autocomplete table {
   border-collapse: separate;
   border-spacing: 0;
   vertical-align: middle;
 }
-/* line 43, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-.ui-dialog caption, .ui-dialog th, .ui-dialog td, .ui-autocomplete caption, .ui-autocomplete th, .ui-autocomplete td {
+.chutney-dialog caption, .chutney-dialog th, .chutney-dialog td, .chutney-autocomplete caption, .chutney-autocomplete th, .chutney-autocomplete td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle;
 }
-/* line 45, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-.ui-dialog q, .ui-dialog blockquote, .ui-autocomplete q, .ui-autocomplete blockquote {
+
+.chutney-dialog q, .chutney-dialog blockquote, .chutney-autocomplete q, .chutney-autocomplete blockquote {
   quotes: "" "";
 }
-/* line 96, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-.ui-dialog q:before, .ui-dialog q:after, .ui-dialog blockquote:before, .ui-dialog blockquote:after, .ui-autocomplete q:before, .ui-autocomplete q:after, .ui-autocomplete blockquote:before, .ui-autocomplete blockquote:after {
+
+.chutney-dialog q:before, .chutney-dialog q:after, .chutney-dialog blockquote:before, .chutney-dialog blockquote:after {
   content: "";
 }
-/* line 47, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
-.ui-dialog a img, .ui-autocomplete a img {
+
+.chutney-dialog a img, .chutney-autocomplete a img {
   border: none;
 }
 
@@ -91,7 +85,7 @@ body.chutney {
 /* NOTE: We need to protect ourselves from name collisions in two ways.  First,
  * we want to avoid polluting the page in which we're running with definitions
  * that mess it up when chutney is closed -- thus, we run everything under the
- * #chutney namespace (with the exception of .ui-dialog which runs over
+ * #chutney namespace (with the exception of .chutney-dialog which runs over
  * div#chutney, and body.chutney which we only create in frameset pages).
  * Second, we want to avoid our own definitions getting screwed up by generic
  * names that are defined by the page we're on (e.g. '.transactions').  Thus,

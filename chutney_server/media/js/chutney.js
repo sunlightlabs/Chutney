@@ -1,6 +1,6 @@
 jQuery.noConflict();
 // Define window.console in case we forget to remove a console.log call.
-if (typeof window.console === "undefined") { window.console = { log: function() {} }; }
+//if (typeof window.console === "undefined") { window.console = { log: function() {} }; }
 (function() {
 var $ = jQuery;
 
@@ -11,7 +11,6 @@ var NAME_SEARCH_URL = CHUTNEY_SERVER_URL + "/names.json"
 var API_TIMEOUT = 30 * 1000; // milliseconds
 
 var stylesheets = [
-    CHUTNEY_MEDIA_URL + "css/south-street/jquery-ui-1.8.4.custom.css",
     CHUTNEY_MEDIA_URL + "css/style.css"
 ];
 var COOKIE_NAME = "chutney";
@@ -398,43 +397,33 @@ var chutney = {
             scriptsInserted = true;
         }
 
-        // Ensure jquery-ui CSS is loaded before we continue.  Otherwise, we
-        // get messy race conditions with overlay positioning.
-        var span = $(document.createElement("span")).attr("class", "ui-icon");
-        $("body").append(span);
-        var style = span.css("display");
-        span.remove();
-        // if jquery-ui isn't loaded, "span.ui-icon" will have default
-        // "display: inline", not "display: block".
-        if (style == "block") {
-            if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1) {
-                $(document.createElement("div"))
-                    .attr("title", "Chutney bookmarklet")
-                    .html("<p>This is a bookmarklet, not a link &ndash; " +
-                          "to use it, drag that " +
-                          "'chutney' up to your bookmarks toolbar, or " +
-                          "right-click on it and choose \"Bookmark " +
-                          "this\".</p><br /><p>After adding the bookmarklet, go to a " +
-                          "site with bank transactions and click on it, and you'll " +
-                          "see what those transactions are influencing!</p>")
-                    .dialog({
-                        buttons: {
-                            "Got it": function() {
-                                $(this).dialog("close");
-                                $(this).remove();
-                                return;
-                            }
-                        },
-                        resizable: false,
-                        draggable: false
-                    });
-                return;
-            } else {
-                chutney.run();
-            }
+        if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1) {
+            $("<div class='chutney-dialog' style='width: 400px; display: none;'>")
+                .html("<h1>Chutney bookmarklet</h1><p>This is a bookmarklet, not a link &ndash; " +
+                      "to use it, drag that " +
+                      "'chutney' up to your bookmarks toolbar, or " +
+                      "right-click on it and choose \"Bookmark " +
+                      "this\".</p><br /><p>After adding the bookmarklet, go to a " +
+                      "site with bank transactions and click on it, and you'll " +
+                      "see what those transactions are influencing!</p>" +
+                      "<div class='chutney-close'>Got it</div>")
+                .appendTo(document.body)
+                .overlay({
+                    close: '.chutney-close',
+                    mask: {
+                        color: '#2b2922',
+                        loadSpeed: 200,
+                        opacity: 0.9
+                    },
+                    closeOnClick: false,
+                    oneInstance: false,
+                    fixed: false,
+                    load: true
+                });
+            return;
         } else {
-            setTimeout(chutney.start, 1000);
-        }
+            chutney.run();
+            }
     },
     run: function() {
         // parse transactions before any mucking with the DOM
@@ -444,19 +433,20 @@ var chutney = {
         chutney.setUpHtml();
         if (chutney.txdata.txs.length == 0) {
             // No transactions found -- display message then exit.
-            $(document.createElement("div"))
-                .attr("title", "No transactions found")
-                .html("<p>Sorry, we couldn't find any transactions on this page.</p>")
-                .dialog({
-                    buttons: {
-                        shucks: function() {
-                            $(this).dialog("close");
-                            $(this).remove();
-                            chutney.div.dialog("close");
-                        }
+            $("<div class='chutney-dialog' style='width: 400px; display: none;'>")
+                .html("<h1>No transactions found</h1><p>Sorry, we couldn't find any transactions on this page.</p><div class='chutney-close'>Shucks</div>")
+                .appendTo(document.body)
+                .overlay({
+                    close: '.chutney-close',
+                    mask: {
+                        color: '#2b2922',
+                        loadSpeed: 200,
+                        opacity: 0.9
                     },
-                    resizable: false,
-                    draggable: false
+                    closeOnClick: false,
+                    oneInstance: false,
+                    fixed: false,
+                    load: true
                 });
             return;
         } 
@@ -501,22 +491,20 @@ var chutney = {
     apiTimeout: function() {
         // Error -- timeout                
         chutney.recipeDone = true;
-        var div = $(document.createElement("div"));
-        div.html("Error communicating with server.");
-        div.dialog({
-            buttons: {
-                'Try again': function() {
-                    $(this).dialog('close');
-                    chutney.start();
-                },
-                'Cancel': function() {
-                    $(this).dialog('close');
-                }
+        var div = $("<div class='chutney-dialog' style='display: none; width: 400px;'>");
+        div.html("<p>Error communicating with server.</p><div class='chutney-close'>Got it</div>")
+        .appendTo(document.body)
+        .overlay({
+            close: '.chutney-close',
+            mask: {
+                color: '#2b2922',
+                loadSpeed: 200,
+                opacity: 0.9
             },
-            modal: true,
-            zIndex: 10000,
-            resizable: false,
-            draggable: false
+            closeOnClick: false,
+            oneInstance: false,
+            fixed: false,
+            load: true
         });
     },            
     /*
@@ -537,10 +525,10 @@ var chutney = {
             $("html").css("overflow", "auto");
         }
         if (chutney.div == undefined) {
-            chutney.div = $(document.createElement("div")).attr({'id': "chutney"});
-            chutney.div.html([
+            chutney.div = $(["<div id='chutney' class='chutney-dialog' style='display: none; width: 950px; min-height: 500px;'>",
                 "<div class='chutney-loading'>", SPINNER, "</div>",
-                "<div id='chutney' class='chutney-content' style='display: none;'>",
+                "<div class='chutney-content' style='display: none;'>",
+                    "<h1>Chutney</h1>",
                     "<p class='chutney-about'>Some descriptive text and a link back to ",
                         outboundLink("http://transparencydata.com", "Transparency Data"),
                         " or ", outboundLink(CHUTNEY_BRISKET_URL, "Influence Explorer"), ".  ",
@@ -571,34 +559,39 @@ var chutney = {
                         "<div class='clear'></div>",
                     "</div>",
                     "<div class='chutney-transactions'></div>",
-                "</div>"].join(""));
-            chutney.div.dialog({
-                autoOpen: false,
-                width: 950,
-                minHeight: 500,
-                modal: true,
-                position: 'top',
-                draggable: false,
-                resizable: false,
-                title: "Chutney",
-                close: function() {
-                    if (chutney.frameset) {
-                        // rather than trying to rebuild a frameset, just
-                        // reload the page on close.
-                        location.reload(true);
-                    }
-                }
-            });
+                "</div>",
+                "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
+            "</div>"].join("")).appendTo(document.body);
             // hack to hide other things that may be covering up our dialog
-            $('[style*=z-index]').not('.ui-dialog,.ui-widget-overlay').each(function() {
+            $('[style*=z-index]').not('#chutney,#exposeMask').each(function() {
                 var $this = $(this);
-                if (parseInt($this.css('z-index')) >= 1002) {
-                    $this.css('z-index', 1001);
+                if (parseInt($this.css('z-index')) > 9990) {
+                    $this.css('z-index', 9990);
                 }
             })
+        } else {
+            $('#chutney').removeData('overlay');
         }
         $(window).scrollTop(0);
-        chutney.div.dialog('open');
+        chutney.div.overlay({            
+            onClose: function() {
+                if (chutney.frameset) {
+                    // rather than trying to rebuild a frameset, just
+                    // reload the page on close.
+                    location.reload(true);
+                }
+            },
+            close: '.chutney-close',
+            mask: {
+                color: '#2b2922',
+                loadSpeed: 200,
+                opacity: 0.9
+            },
+            closeOnClick: false,
+            oneInstance: false,
+            fixed: false,
+            load: true
+        });
     },
 
     /*

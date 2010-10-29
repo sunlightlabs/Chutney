@@ -75,7 +75,7 @@ def assemble_js(request):
         root + "raphael-min.js",
         root + "g.raphael-min.js",
         root + "g.pie-min.js",
-        root + "jquery-ui.min.js",
+        root + "jquery.tools.min.js",
         root + "jquery.cookie.js",
         root + "chutney.js",
     ]
@@ -96,6 +96,7 @@ def assemble_js(request):
         else:
             with open(filename) as fh:
                 out.write(fh.read())
+        out.write("\n\n")
     
     return HttpResponse(out.getvalue(), content_type="text/javascript")
 
