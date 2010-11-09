@@ -973,11 +973,13 @@ var chutney = {
                 // close icon
                 closeIcon(function() { $(".chutney-editor").remove(); }),
                 // label
-                org.txs.length > 1 ? "These transactions match: " : "This transaction matches: ",
-                // inputs
-                input,
-                submit,
-                removeMatch,
+                $("<div id='enityEditor'>" ).append(
+                    org.txs.length > 1 ? "<span>These transactions match: </span>" : "<span>This transaction matches: </span>",
+                    // inputs
+                    input,
+                    submit,
+                    removeMatch
+                ), 
                 chutney.orgTxTable(org)
             );
 
