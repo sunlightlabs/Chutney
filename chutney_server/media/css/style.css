@@ -111,12 +111,12 @@
 #chutney th { color: #000000; font-weight: bold; padding-bottom: 5px; text-transform: uppercase; font-size: 110%;}
 
 #chutney table.chutney-transactions td {
-    padding: 12px 5px 8px;
+  padding: 12px 5px 8px;
+  border-bottom: 1px dotted #dddddd;
 }
 /* line 106, ././style.sass */
 #chutney table.chutney-transactions td + td {
   width: 45%;
-  border-bottom: 1px dotted #dddddd;
 }
 /* line 109, ././style.sass */
 #chutney table.chutney-transactions td + td + td {
@@ -189,3 +189,8 @@
   height: 60px;
   float: left;
 }
+
+/* CHANGEME */
+
+#chutney .ui-icon-triangle-1-s { display: block; width: 16px; height: 16px; background-image: url(south-street/images/ui-icons_808080_256x240.png); background-position: -64px -16px; }
+#chutney .ui-icon-triangle-1-e { display: block; width: 16px; height: 16px; background-image: url(south-street/images/ui-icons_808080_256x240.png); background-position: -32px -16px; }
