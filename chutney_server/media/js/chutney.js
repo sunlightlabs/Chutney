@@ -528,7 +528,7 @@ var chutney = {
             chutney.div = $(["<div id='chutney' class='chutney-dialog' style='display: none; width: 950px; min-height: 500px;'>",
                 "<div class='chutney-loading'>", SPINNER, "</div>",
                 "<div class='chutney-content' style='display: none;'>",
-                    "<div id='header'>",
+                    "<div id='chutneyHeader'>",
                         "<h1>Checking Influence</h1>",
                         "<p class='chutney-about'>Some descriptive text and a link back to ",
                             outboundLink("http://transparencydata.com", "Transparency Data"),
@@ -722,11 +722,11 @@ var chutney = {
         });
         var sortMark = "<span class='ui-icon ui-icon-carat-2-n-s' style='float: left;'></span>";
         table.append(["<tr><th></th>",
-                     "<th onclick='chutney.sortTransactions(\"name\"); return false;'>", 
+                     "<th class='sort' onclick='chutney.sortTransactions(\"name\"); return false;'>", 
                         chutney.sortBy == 'name' ? sortMark : '', "Name of Transaction</th>",
-                     "<th onclick='chutney.sortTransactions(\"match\"); return false;'>", 
+                     "<th class='sort' onclick='chutney.sortTransactions(\"match\"); return false;'>", 
                         chutney.sortBy == 'match' ? sortMark : '', "Matching organization</th>",
-                     "<th onclick='chutney.sortTransactions(\"amount\"); return false;'>", 
+                     "<th class='sort' onclick='chutney.sortTransactions(\"amount\"); return false;'>", 
                         chutney.sortBy == 'amount' ? sortMark : '', 
                         "Amount</th>",
                     "</tr>"].join(""));

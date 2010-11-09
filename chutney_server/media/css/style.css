@@ -17,7 +17,7 @@
 }
 .chutney-dialog, #chutney {
     color: #666666;
-    font-size: 82%;
+    font-size: 13px;
     line-height: 20px;
     font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
     text-align: left;
@@ -42,7 +42,7 @@
 #chutney .percent { color: #989393; font-style: oblique; font-family: Georgia, "Times New Roman", Times, serif;}
 #chutney .clear { clear: both; display: block;}
 
-#chutney #header { border-bottom:1px dashed #DCDCD8; margin-bottom: 25px; padding-bottom: 10px;}
+#chutney #chutneyHeader { border-bottom:1px dashed #DCDCD8; margin-bottom: 25px; padding-bottom: 10px;}
 #chutney .chutney-even { background-color: #F5F4F4; }
 
 #chutney input { margin: auto; background-color: #efeeec; border: 1px solid #dedcd8; padding: 5px;}
@@ -54,6 +54,10 @@
 #chutney .totalGiven { color: #666;}
 
 #chutney .issuesList { font-size: 95%; color: #666;}
+
+#chutney .sort { background: url(../img/sortArrows.png) top left no-repeat; padding-left: 20px;}
+
+#chutney .chutney-unmatched, #chutney .chutney-unmatched a { color: #999;}
 
 .recipientsList { text-transform: capitalize;}
 
