@@ -61,7 +61,7 @@
 
 #chutney .chutney-unmatched, #chutney .chutney-unmatched a { color: #999;}
 
-.ui-icon .ui-icon-closethic { background: url(../img/delete_16.png) top left no-repeat; width: 16px; height: 16px;}
+#chutney .ui-icon-closethick { background: url(../img/delete_16.png) top left no-repeat; width: 16px; height: 16px; display: block; float: left; }
 
 #chutney .recipientsList a { text-transform: capitalize;}
 
