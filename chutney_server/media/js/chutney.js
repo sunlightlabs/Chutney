@@ -722,11 +722,11 @@ var chutney = {
         });
         var sortMark = "<span class='ui-icon ui-icon-carat-2-n-s' style='float: left;'></span>";
         table.append(["<tr><th></th>",
-                     "<th class='sort' onclick='chutney.sortTransactions(\"name\"); return false;'>", 
+                     "<th class='chutney-sort' onclick='chutney.sortTransactions(\"name\"); return false;'>", 
                         chutney.sortBy == 'name' ? sortMark : '', "Name of Transaction</th>",
-                     "<th class='sort' onclick='chutney.sortTransactions(\"match\"); return false;'>", 
+                     "<th class='chutney-sort' onclick='chutney.sortTransactions(\"match\"); return false;'>", 
                         chutney.sortBy == 'match' ? sortMark : '', "Matching organization</th>",
-                     "<th class='sort' onclick='chutney.sortTransactions(\"amount\"); return false;'>", 
+                     "<th class='chutney-sort' onclick='chutney.sortTransactions(\"amount\"); return false;'>", 
                         chutney.sortBy == 'amount' ? sortMark : '', 
                         "Amount</th>",
                     "</tr>"].join(""));

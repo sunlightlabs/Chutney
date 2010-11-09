@@ -55,7 +55,7 @@
 
 #chutney .issuesList { font-size: 95%; color: #666;}
 
-#chutney .sort { background: url(../img/sortArrows.png) top left no-repeat; padding-left: 20px;}
+#chutney .chutney-sort { background: url(../img/sortArrows.png) top left no-repeat; padding-left: 20px;}
 
 #chutney .chutney-unmatched, #chutney .chutney-unmatched a { color: #999;}
 
