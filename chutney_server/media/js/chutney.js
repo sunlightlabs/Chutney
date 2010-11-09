@@ -718,17 +718,16 @@ var chutney = {
         var corps = chutney.sortedOrgNames();
         var table = $(document.createElement("table")).attr({
             'cellspacing': 0,
-            'class': 'chutney-transactions',
+            'class': 'chutney-transactions'
         });
-        var sortMark = "<span class='ui-icon ui-icon-carat-2-n-s' style='float: left;'></span>";
+        var sortClass = ' chutney-sort-' + (chutney.asc > 0 ? 'asc': 'desc');
         table.append(["<tr><th></th>",
-                     "<th class='chutney-sort' onclick='chutney.sortTransactions(\"name\"); return false;'>", 
-                        chutney.sortBy == 'name' ? sortMark : '', "Name of Transaction</th>",
-                     "<th class='chutney-sort' onclick='chutney.sortTransactions(\"match\"); return false;'>", 
-                        chutney.sortBy == 'match' ? sortMark : '', "Matching organization</th>",
-                     "<th class='chutney-sort' onclick='chutney.sortTransactions(\"amount\"); return false;'>", 
-                        chutney.sortBy == 'amount' ? sortMark : '', 
-                        "Amount</th>",
+                     "<th class='chutney-sort", chutney.sortBy == 'name' ? sortClass : '',
+                        "' onclick='chutney.sortTransactions(\"name\"); return false;'>Name of Transaction</th>",
+                     "<th class='chutney-sort", chutney.sortBy == 'match' ? sortClass : '',
+                        "' onclick='chutney.sortTransactions(\"match\"); return false;'>Matching organization</th>",
+                     "<th class='chutney-sort", chutney.sortBy == 'amount' ? sortClass : '',
+                        "' onclick='chutney.sortTransactions(\"amount\"); return false;'>Amount</th>",
                     "</tr>"].join(""));
         $.each(corps, function(i, orgName) {
             table.append(chutney.buildTxRow(orgName));
