@@ -802,7 +802,7 @@ var chutney = {
                 minipie(partyBreakdownId, pb);
             });
 
-            out = ["<tr class='chutney-tx chutney-matched ", tooltipTriggerClass, " ", org.uniqueClass, "'>",
+            out = ["<tr class='chutney-tx chutney-matched ", tooltipTriggerClass, " ", org.uniqueClass, " chutney-expanded'>",
                         "<td class='chutney-carat'>",
                             "<a href='javascript:void(0)' onclick='chutney.toggleTx(this); return false;'>",
                                 "<span class='ui-icon ui-icon-triangle-1-s'></span>",
@@ -990,7 +990,7 @@ var chutney = {
             input.attr("disabled", "disabled")
                  .removeClass("chutney-bad-name")
                  .addClass("ui-autocomplete-loading")
-                 .autocomplete("option", "disabled", true);
+//                 .autocomplete("option", "disabled", true);
             submit.attr("disabled", "disabled");
             chutney.editMatch(orgName, val ? val : input.val(), editor);
         };
@@ -1001,7 +1001,7 @@ var chutney = {
                 return false;
             });
         }
-        input.autocomplete({
+/*        input.autocomplete({
             minLength: 2,
             // get list of names from chutney server.
             source: function(request, responseCallback) {
@@ -1044,7 +1044,7 @@ var chutney = {
                     $(this).removeClass("chutney-bad-name");
                 }
             }
-        });
+        }); */
     },
     // hack to fix a bug where the dialog displays off screen
     _fixOffset: function () {
@@ -1085,7 +1085,9 @@ var chutney = {
         }
     },
     toggleTx: function(el) {
-        var tr = $(el).parents(".tx").next().toggle();
+        var thisTr = $(el).parents(".chutney-tx");
+        thisTr.toggleClass("chutney-expanded chutney-collapsed")
+        var tr = thisTr.next().toggle();
         $(el).find(".ui-icon").toggleClass("ui-icon-triangle-1-s ui-icon-triangle-1-e");
     },
     setViewMode: function() {
