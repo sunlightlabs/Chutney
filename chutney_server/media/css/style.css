@@ -6,29 +6,56 @@
 .chutney-dialog div,.chutney-dialog dl,.chutney-dialog dt,.chutney-dialog dd,.chutney-dialog ul,.chutney-dialog ol,.chutney-dialog li,.chutney-dialog h1,.chutney-dialog h2,.chutney-dialog h3,.chutney-dialog h4,.chutney-dialog h5,.chutney-dialog h6,.chutney-dialog pre,.chutney-dialog form,.chutney-dialog fieldset,.chutney-dialog input,.chutney-dialog textarea,.chutney-dialog optgroup,.chutney-dialog button,.chutney-dialog p,.chutney-dialog blockquote,.chutney-dialog th,.chutney-dialog td{margin:0;padding:0;}.chutney-dialog h1,.chutney-dialog h2,.chutney-dialog h3,.chutney-dialog h4,.chutney-dialog h5,.chutney-dialog h6{font-size:100%;font-weight:normal;}.chutney-dialog table{border-collapse:collapse;border-spacing:0;}.chutney-dialog caption,.chutney-dialog th{text-align:left;}.chutney-dialog ol,.chutney-dialog ul{list-style:none;}.chutney-dialog fieldset,.chutney-dialog img{border:0;}.chutney-dialog input,.chutney-dialog textarea,.chutney-dialog select,.chutney-dialog optgroup,.chutney-dialog option,.chutney-dialog button{font-family:inherit;font-size:100%;}.chutney-dialog button,.chutney-dialog input {width: auto;overflow: visible;}.chutney-dialog optgroup,.chutney-dialog address,.chutney-dialog caption,.chutney-dialog cite,.chutney-dialog code,.chutney-dialog dfn,.chutney-dialog em,.chutney-dialog strong,.chutney-dialog th,.chutney-dialog var{font-style:normal;font-weight:normal;}.chutney-dialog q:before,.chutney-dialog q:after{content:'';}.chutney-dialog abbr,.chutney-dialog acronym {border:0;}
 .chutney-dialog dl li{list-style: none;}
 
-
+#chutney * {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
 .chutney-dialog, #chutney {
     color: #666666;
     font-size: 82%;
     line-height: 20px;
     font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
     text-align: left;
+    -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
 
-#chutney p { margin-bottom: 1em; }
+#chutney a:link { outline: none; color: #0a6e92; text-decoration: none;}
+#chutney a:visited { outline: none; color: #0a6e92; text-decoration: none;}
+#chutney a:hover { outline: none; color: #0a6e92; text-decoration: none;}
+#chutney a:active { outline: none; color: #0a6e92; text-decoration: none;}
 
-#chutney h2 { font-size: 220%; text-transform: uppercase; color: #000000; margin-bottom: 20px;}
-#chutney h3 { font-weight: bold; color: #3b3130; text-transform: uppercase; font-size: 160%; line-height: 25px; margin-bottom: 25px;}
+#chutney p { margin-bottom: 1em; }
+#chutney strong { font-weight: bold; }
+
+#chutney h1 { text-indent: -9999em; display: block; background: url(../img/logo.png) top left no-repeat; width: 230px; height: 87px; float: left; margin: 0 20px 0 0;}
+#chutney h2 { font-size: 180%; text-transform: uppercase; color: #000000; margin-bottom: 20px;}
+#chutney .chutney-transactions h3 { font-weight: bold; color: #585352; margin-bottom: 5px; }
+
+#chutney .chutney-name a .transactionName, #chutney .chutney-corp-name a { font-size: 110%; font-weight: bold;}
 
 #chutney .radio { width: 15px; margin-right: 10px; height: auto; }
 #chutney .percent { color: #989393; font-style: oblique; font-family: Georgia, "Times New Roman", Times, serif;}
 #chutney .clear { clear: both; display: block;}
 
+#chutney #header { border-bottom:1px dashed #DCDCD8; margin-bottom: 25px; padding-bottom: 10px;}
 #chutney .chutney-even { background-color: #F5F4F4; }
 
 #chutney input { margin: auto; }
 
-.chutney-dialog { background: #f5f3e5; padding: 10px; font-size: 10pt; overflow: visible; text-align: left; }
+.chutney-dialog { background: #fff; padding: 20px; overflow: visible; text-align: left; }
+
+#chutney .chutney-about { font-style: oblique; color: #827D7D; font-family: Georgia, "Times New Roman", Times, serif; width: 550px; margin-bottom: 0; float: left; margin-top: 42px;}
+#chutney .transactionNumber, #chutney .totalGiven { font-family: Georgia, "Times New Roman", Times, serif; font-style: oblique; font-size: 95%; margin-left: 15px;}
+#chutney .totalGiven { color: #666;}
+
+#chutney .issuesList { font-size: 95%; color: #666;}
+
+.recipientsList { text-transform: capitalize;}
 
 .chutney-dialog table, .chutney-autocomplete table {
   border-collapse: separate;
@@ -41,46 +68,15 @@
   vertical-align: middle;
 }
 
-.chutney-dialog q, .chutney-dialog blockquote, .chutney-autocomplete q, .chutney-autocomplete blockquote {
-  quotes: "" "";
-}
-
-.chutney-dialog q:before, .chutney-dialog q:after, .chutney-dialog blockquote:before, .chutney-dialog blockquote:after {
-  content: "";
-}
-
-.chutney-dialog a img, .chutney-autocomplete a img {
-  border: none;
-}
-
-/* line 9, ././style.sass */
-body.chutney {
-  position: relative;
-  overflow: scroll;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-/* line 18, ././style.sass */
 .ui-widget-overlay {
   overflow: hidden;
   display: inline-block;
 }
-/* line 8, /var/lib/gems/1.8/gems/compass-0.10.2/frameworks/compass/stylesheets/compass/utilities/general/./_hacks.scss */
+
 .ui-widget-overlay {
   display: block;
 }
 
-/* line 21, ././style.sass */
-#chutney, #chutney td {
-  font-family: "Helvetica Neue", Arial, helvetica, sans-serif;
-  font-size: 13px;
-  line-height: 1.5em;
-  border: none;
-}
 
 /* NOTE: We need to protect ourselves from name collisions in two ways.  First,
  * we want to avoid polluting the page in which we're running with definitions
@@ -90,41 +86,12 @@ body.chutney {
  * Second, we want to avoid our own definitions getting screwed up by generic
  * names that are defined by the page we're on (e.g. '.transactions').  Thus,
  * we prefix every class name with 'chutney-'.
- */ */
-/* line 38, ././style.sass */
-#chutney {
-  overflow: visible;
-}
-/* line 41, ././style.sass */
-#chutney h3, #chutney h4, #chutney h5, #chutney h6 {
-  margin-left: -0.5em;
-  font-size: 1.8em;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  font-weight: bold;
-}
+ */ 
 
-
-/* line 60, ././style.sass */
-#chutney small {
-  font-size: 0.8em;
-}
-/* line 62, ././style.sass */
-#chutney strong {
-  font-weight: bold;
-}
-/* line 64, ././style.sass */
-#chutney li {
-  list-style-type: none;
-}
-/* line 68, ././style.sass */
-#chutney .chutney-about {
-  font-style: italic;
-  color: #999999;
-}
+#chutney { overflow: visible;}
 
 #chutney .chutney-viewmode { display: block; background-color: #DCE6E0; padding: 10px 20px; margin-bottom: 30px; }
-#chutney #filterTitle { float: left; margin-right: 25px; font-weight: bold;}
+#chutney #filterTitle { float: left; font-weight: bold;}
 #chutney .chutney-viewmode ul { float: left; }
 #chutney .chutney-viewmode ul li { margin-left: 25px; float: left; }
 
@@ -133,12 +100,10 @@ body.chutney {
   border-collapse: collapse;
 }
 
-#chutney th { color: #585352; font-weight: bold; padding-bottom: 5px; text-transform: uppercase;}
+#chutney th { color: #000000; font-weight: bold; padding-bottom: 5px; text-transform: uppercase; font-size: 110%;}
 
 #chutney table.chutney-transactions td {
-  vertical-align: top;
-  width: 1%;
-  padding: 0.5em;
+    padding: 12px 5px 8px;
 }
 /* line 106, ././style.sass */
 #chutney table.chutney-transactions td + td {
@@ -153,39 +118,13 @@ body.chutney {
 #chutney table.chutney-transactions td + td + td + td {
   width: 14%;
 }
-/* line 114, ././style.sass */
+
 #chutney table.chutney-transactions tr.chutney-tx a.chutney-editlink, #chutney table.chutney-transactions tr.chutney-tx a.chutney-editlink:visited {
-  margin-left: 1em;
-  color: #999999;
-}
-/* line 117, ././style.sass */
-#chutney table.chutney-transactions tr.chutney-org, #chutney table.chutney-transactions tr.chutney-org a, #chutney table.chutney-transactions tr.chutney-org a:visited {
-  color: #333333;
-}
-/* line 119, ././style.sass */
-#chutney table.chutney-transactions tr.chutney-unmatched, #chutney table.chutney-transactions tr.chutney-unmatched a, #chutney table.chutney-transactions tr.chutney-unmatched a:visited {
-  color: #999999;
+  font-weight: normal;
+  font-size: 100%;
+  margin-left: 15px;
 }
 
-/* line 124, ././style.sass */
-#chutney table.chutney-transactions td.chutney-name {
-  cursor: pointer;
-}
-/* line 126, ././style.sass */
-#chutney table.chutney-transactions td.chutney-name a {
-  display: block;
-  float: left;
-  text-decoration: none;
-}
-/* line 130, ././style.sass */
-#chutney table.chutney-transactions td.chutney-name a:hover {
-  text-decoration: underline;
-}
-/* line 132, ././style.sass */
-#chutney table.chutney-transactions td.chutney-name span {
-  float: left;
-}
-/* line 136, ././style.sass */
 #chutney .chutney-tx-tooltip {
   background: white;
   border: 1px solid #dddddd;
