@@ -1119,10 +1119,7 @@ var chutney = {
             $(".chutney-unmatched").show();
         }
         // Fix background overlay height to suit our new height.
-        $(".ui-widget-overlay").height(Math.max(
-            $("body").height(),
-            $("#chutney").height() + 100
-        ) + "px");
+        $(window).resize();
         chutney.fixOddEvenRows();
     },
     fixOddEvenRows: function() {
