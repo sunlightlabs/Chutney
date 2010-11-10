@@ -579,7 +579,17 @@ var chutney = {
             $('#chutney').removeData('overlay');
         }
         $(window).scrollTop(0);
-        chutney.div.overlay({            
+        if ($.browser.mozilla && chutney.frameset) {
+            // hack to work around firefox issue
+            var overlayDiv = $('<div>').css({'top': '0', 'width': '100%', 'height': '100%', 'overflow': 'auto', 'display': 'none'});
+            $('body').append(overlayDiv);
+            chutney.div.remove().appendTo(overlayDiv);
+            chutney.div.css({'display': 'block', 'margin-left': 'auto', 'margin-right': 'auto', 'margin-top': '20px', 'margin-bottom': '20px'})
+            $('body').css('height', '100%');
+        } else {
+            var overlayDiv = chutney.div;
+        }
+        overlayDiv.overlay({
             onClose: function() {
                 if (chutney.frameset) {
                     // rather than trying to rebuild a frameset, just
@@ -598,6 +608,11 @@ var chutney = {
             fixed: false,
             load: true
         });
+        
+        // part 2 of firefox hack
+        if ($.browser.mozilla && chutney.frameset) {
+            overlayDiv.css('top', 0);
+        }
     },
 
     /*
