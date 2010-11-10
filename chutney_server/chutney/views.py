@@ -86,8 +86,6 @@ def assemble_js(request):
     out.write("var CHUTNEY_SERVER_URL = '%s://%s';" % (protocol, request.META['HTTP_HOST']))
     out.write("var CHUTNEY_BRISKET_URL = '%s';" % settings.BRISKET_URL)
     out.write("var CHUTNEY_MEDIA_URL = '%s://%s/media/';" % (protocol, request.META['HTTP_HOST']))
-    print settings.FORCE_HTTPS
-    print request.is_secure()
     for filename in js:
         #print "... adding", filename
         if filename.startswith("http"):

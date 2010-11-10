@@ -8,6 +8,6 @@ urlpatterns = patterns('chutney.views',
     url(r'^names.json', 'name_search', name='chutney.names.json'),
     url(r'^$', direct_to_template, {
         'template': 'chutney/home.html', 
-        'extra_context': {'SERVER_URL': settings.SERVER_URL}
+        'extra_context': {'SERVER_URL': settings.SERVER_URL, 'FORCE_HTTPS': settings.FORCE_HTTPS}
     }, name='home')
 )
