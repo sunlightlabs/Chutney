@@ -286,7 +286,9 @@ function autoDetectTxs() {
     var docs = [window.document];
     if (window.frames && window.frames.length > 0) {
         for (var i = 0; i < window.frames.length; i++) {
-            docs.push(window.frames[i].document);
+            try {
+                docs.push(window.frames[i].document);
+            } catch (error) {}
         }
     }
 
