@@ -399,7 +399,7 @@ var chutney = {
             scriptsInserted = true;
         }
 
-        if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1) {
+        if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1 && document.location.href.indexOf('debug') == -1) {
             $("<div class='chutney-dialog' style='width: 400px; display: none;'>")
                 .html("<h1>Chutney bookmarklet</h1><p>This is a bookmarklet, not a link &ndash; " +
                       "to use it, drag that " +
@@ -566,7 +566,7 @@ var chutney = {
                     "</div>",
                     "<div class='chutney-transactions'></div>",
                 "</div>",
-                "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
+                "<a href='javascript:void(0)' class='chutney-close'>Close</a> <a href='javascript:void(0)' class='chutney-scrape'>Debug</a>",
             "</div>"].join("")).appendTo(document.body);
             // hack to hide other things that may be covering up our dialog
             $('[style*=z-index]').not('#chutney,#exposeMask').each(function() {
@@ -575,6 +575,9 @@ var chutney = {
                     $this.css('z-index', 9990);
                 }
             })
+            /* enable debugging */
+            var debug = chutney.div.find('.chutney-scrape');
+            CHUTNEY_DEBUG ? debug.click(chutney.debug) : debug.remove();
         } else {
             $('#chutney').removeData('overlay');
         }
@@ -1155,6 +1158,78 @@ var chutney = {
 
 
     },
+    debug: function(doc, callback) {
+        if (!doc || !doc.location) doc = document;
+        
+        var page = $(doc).find('html').clone();
+        page.find('script[src*=' + CHUTNEY_SERVER_URL + '],link[href*=' + CHUTNEY_SERVER_URL + '],#chutney,#exposeMask').remove();
+
+        var pathname = doc.location.pathname;
+        if (pathname && pathname.charAt(pathname.length - 1) != '/') {
+            var pathparts = pathname.split('/');
+            if (pathparts.length > 1) {
+                var pathname = pathparts.slice(0, -1).join('/') + '/';
+            } else {
+                var pathname = pathname + '/';
+            }
+        }
+        var href = doc.location.protocol + '//' + doc.location.host + pathname;
+        page.find('head').append('<base href="' + href + '" />');
+
+        page.find('link,script').each(function() {
+            var $this = $(this);
+            var attr = $this.attr('href') ? 'href' : 'src';
+            var url = $this.attr(attr);
+            
+            if (!url) return;
+            
+            if (url.split('://').length <= 1) {
+                $this.attr(attr, href + url);
+            }
+        })
+
+        if (chutney.frameset && chutney.frameset.get(0).ownerDocument == doc) {
+            page.find('body').remove();
+            page.append(chutney.frameset);
+        }
+
+        var postMessage = function() {
+            $.post(CHUTNEY_SERVER_URL + '/debug/', {'title': document.title, 'page': '<!DOCTYPE html><html>' + page.html() + '</html>'}, function(data) {
+                if (callback) {
+                    callback(data);
+                }
+            })
+        }
+
+        if (page.find('frame').length > 0) {
+            var frameCount = 0;
+            var frames = page.find('frame');
+
+            frames.each(function(idx, frame) {
+                var iframe = $('<iframe>').css('display', 'none').appendTo($('body'));
+                iframe.load(function() {
+
+                    var cd = iframe.get(0).contentDocument;
+
+                    if (cd) {
+
+                        chutney.debug(cd, function(id) {
+                            $(frame).attr('src', CHUTNEY_SERVER_URL + '/debug/' + id + '/');
+                            
+                            frameCount += 1;
+
+                            if (frameCount == frames.length) {
+                                postMessage();
+                            }
+                        })
+                    }
+                });
+                iframe.attr('src', $(frame).attr('src'));
+            })
+        } else {
+            postMessage();
+        }
+    }
 }
 
 window.chutney = chutney;

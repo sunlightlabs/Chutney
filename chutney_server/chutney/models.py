@@ -253,3 +253,16 @@ class Api(object):
         return simplejson.dumps(results, indent=4)
 
 corp_matcher = CorpMatcher()
+
+from django.db import models
+class DebugPage(models.Model):
+    title = models.TextField(blank=True)
+    page = models.TextField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    fixed = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.title
+    
+    def get_absolute_url(self):
+        return '/debug/%s/' % self.pk

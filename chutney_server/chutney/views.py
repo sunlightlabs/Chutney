@@ -63,7 +63,7 @@ def name_search(request):
         orgs = list(orgs)
     return _json_response(request, simplejson.dumps(orgs))
 
-def assemble_js(request):
+def assemble_js(request, debug=False):
     """ 
     Assemble all needed javascript in order.  IE and Chrome don't reliably
     parse dynamic script insertions in order, so we construct a single js to
@@ -77,8 +77,12 @@ def assemble_js(request):
         root + "g.pie-min.js",
         root + "jquery.tools.min.js",
         root + "jquery.cookie.js",
-        root + "chutney.js",
     ]
+    
+    if debug:
+        js.append(root + "jquery.windowname.plugin.js")
+    
+    js.append(root + "chutney.js")
 
     protocol = 'https' if settings.FORCE_HTTPS or request.is_secure() else 'http'
     out = StringIO()
@@ -86,6 +90,8 @@ def assemble_js(request):
     out.write("var CHUTNEY_SERVER_URL = '%s://%s';" % (protocol, request.META['HTTP_HOST']))
     out.write("var CHUTNEY_BRISKET_URL = '%s';" % settings.BRISKET_URL)
     out.write("var CHUTNEY_MEDIA_URL = '%s://%s/media/';" % (protocol, request.META['HTTP_HOST']))
+    out.write("var CHUTNEY_DEBUG = %s;" % str(debug).lower())
+    
     for filename in js:
         #print "... adding", filename
         if filename.startswith("http"):
@@ -98,3 +104,30 @@ def assemble_js(request):
     
     return HttpResponse(out.getvalue(), content_type="text/javascript")
 
+from django import forms
+from django.http import HttpResponseBadRequest, Http404
+from chutney.models import DebugPage
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.csrf import csrf_exempt
+from chutney.decorators import cors_allow_all
+
+class DebugForm(forms.ModelForm):
+    class Meta:
+        model = DebugPage
+
+@csrf_exempt
+@cors_allow_all
+def debug_create(request):
+    if request.method == 'POST':
+        form = DebugForm(request.POST)
+        if form.is_valid():
+            obj = form.save()
+            return HttpResponse(str(obj.id))
+    return HttpResponseBadRequest()
+
+@staff_member_required
+def debug_view(request, id):
+    try:
+        return HttpResponse(DebugPage.objects.get(pk=id).page)
+    except DebugPage.DoesNotExist:
+        raise Http404
