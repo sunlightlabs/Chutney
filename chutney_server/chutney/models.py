@@ -257,8 +257,14 @@ corp_matcher = CorpMatcher()
 from django.db import models
 class DebugPage(models.Model):
     title = models.TextField(blank=True)
+    email = models.EmailField(blank=True)
+    description = models.TextField(blank=True)
+    
+    main_page = models.BooleanField(default=True)
+    user_agent = models.CharField(max_length=512, blank=True)
     page = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    
     fixed = models.BooleanField(default=False)
     
     def __str__(self):
@@ -266,3 +272,7 @@ class DebugPage(models.Model):
     
     def get_absolute_url(self):
         return '/debug/%s/' % self.pk
+    
+    def link(self):
+        return "<a href='%s'>View submission</a>" % self.get_absolute_url()
+    link.allow_tags = True

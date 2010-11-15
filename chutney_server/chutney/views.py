@@ -81,6 +81,7 @@ def assemble_js(request, debug=False):
     
     if debug:
         js.append(root + "jquery.windowname.plugin.js")
+        js.append(root + "jquery.textnodes.js")
     
     js.append(root + "chutney.js")
 
@@ -114,6 +115,7 @@ from chutney.decorators import cors_allow_all
 class DebugForm(forms.ModelForm):
     class Meta:
         model = DebugPage
+        exclude = ('user_agent',)
 
 @csrf_exempt
 @cors_allow_all
@@ -121,7 +123,9 @@ def debug_create(request):
     if request.method == 'POST':
         form = DebugForm(request.POST)
         if form.is_valid():
-            obj = form.save()
+            obj = form.save(commit=False)
+            obj.user_agent = request.META['HTTP_USER_AGENT'][:512]
+            obj.save()
             return HttpResponse(str(obj.id))
     return HttpResponseBadRequest()
 

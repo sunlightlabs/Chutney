@@ -542,31 +542,34 @@ var chutney = {
                         "<div class='clear'></div>",
                     "</div>",
                     
-                    "<h2>Your Transactions (<span class='chutney-start-date'></span> &ndash; ", 
-                                            "<span class='chutney-end-date'></span>)</h2>",
-                    "<div class='chutney-viewmode'><span id='filterTitle'>View</span><ul>",
-                        "<li>",
-                            "<input type='radio' class='radio' name='viewmode' id='chutney_viewmode_matched' ",
-                                " onclick='chutney.setViewMode();' checked />",
-                            "<label for='chutney_viewmode_matched'>Matching Transactions ",
-                                "<span class='percent'>(<span class='chutney-matched-percentage'>0</span>%)</span>",
-                            "</label>",
-                        "</li><li>",
-                            "<input type='radio' class='radio' name='viewmode' id='chutney_viewmode_unmatched' ",
-                                " onclick='chutney.setViewMode();' />",
-                            "<label for='chutney_viewmode_unmatched'>Non-Matching Transactions ",
-                                "<span class='percent'>(<span class='chutney-unmatched-percentage'>0</span>%)</span>",
-                            "</label>",
-                        "</li><li>",
-                            "<input type='radio' class='radio' name='viewmode' id='chutney_viewmode_all' ",
-                                " onclick='chutney.setViewMode();' />",
-                            "<label for='chutney_viewmode_all'>All</label>",
-                        "</li></ul>",
-                        "<div class='clear'></div>",
+                    "<div class='chutney-main-content'>",
+                        "<h2>Your Transactions (<span class='chutney-start-date'></span> &ndash; ", 
+                                                "<span class='chutney-end-date'></span>)</h2>",
+                        "<div class='chutney-viewmode'><span id='filterTitle'>View</span><ul>",
+                            "<li>",
+                                "<input type='radio' class='radio' name='viewmode' id='chutney_viewmode_matched' ",
+                                    " onclick='chutney.setViewMode();' checked />",
+                                "<label for='chutney_viewmode_matched'>Matching Transactions ",
+                                    "<span class='percent'>(<span class='chutney-matched-percentage'>0</span>%)</span>",
+                                "</label>",
+                            "</li><li>",
+                                "<input type='radio' class='radio' name='viewmode' id='chutney_viewmode_unmatched' ",
+                                    " onclick='chutney.setViewMode();' />",
+                                "<label for='chutney_viewmode_unmatched'>Non-Matching Transactions ",
+                                    "<span class='percent'>(<span class='chutney-unmatched-percentage'>0</span>%)</span>",
+                                "</label>",
+                            "</li><li>",
+                                "<input type='radio' class='radio' name='viewmode' id='chutney_viewmode_all' ",
+                                    " onclick='chutney.setViewMode();' />",
+                                "<label for='chutney_viewmode_all'>All</label>",
+                            "</li></ul>",
+                            "<div class='clear'></div>",
+                        "</div>",
+                        "<div class='chutney-transactions'></div>",
                     "</div>",
-                    "<div class='chutney-transactions'></div>",
+                    "<div class='chutney-message'></div>",
                 "</div>",
-                "<a href='javascript:void(0)' class='chutney-close'>Close</a> <a href='javascript:void(0)' class='chutney-scrape'>Debug</a>",
+                "<a href='javascript:void(0)' class='chutney-close'>Close</a> <a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'>Report a Problem</a>",
             "</div>"].join("")).appendTo(document.body);
             // hack to hide other things that may be covering up our dialog
             $('[style*=z-index]').not('#chutney,#exposeMask').each(function() {
@@ -577,7 +580,7 @@ var chutney = {
             })
             /* enable debugging */
             var debug = chutney.div.find('.chutney-scrape');
-            CHUTNEY_DEBUG ? debug.click(chutney.debug) : debug.remove();
+            CHUTNEY_DEBUG || debug.remove();
         } else {
             $('#chutney').removeData('overlay');
         }
@@ -1158,12 +1161,44 @@ var chutney = {
 
 
     },
-    debug: function(doc, callback) {
+    debugMessage: function() {
+        $('#chutney .chutney-message').hide().html([
+            "<h2>Report a Problem</h2>",
+            "<div class='chutney-message-content'>If Checking Influence either isn't displaying correctly, or ",
+                "isn't recognizing transactions you think it should recognize, please consider submitting a bug report to us. ",
+                "Please be aware that submitting a bug report will send us both the message you write about your problem ",
+                "<em>and</em> a snapshot of your banking site so that we can diagnose the nature of the problem. ",
+                "<strong>This means that unlike normal, day-to-day use of Checking Influence, which is completely anonymous, ",
+                "use of this bug-reporting feature will submit personally identifiable information to Sunlight staff.</strong> ",
+                "We will make an effort to strip account numbers and transaction amounts, but some information such as your ",
+                "name will likely remain in the information that is submitted to Sunlight.<br /><br />",
+                "If you wish to submit an error report, you may provide further details as well as your contact information in the fields below. ",
+                "All form fields are optional.",
+                "<form onsubmit='return false;' class='chutney-debug-form'>",
+                    "<label for='chutney-debug-email'>Email address:</label>",
+                    "<input type='text' id='chutney-debug-email' name='email' />",
+                    "<label for='chutney-debug-description'>Description of problem:</label>",
+                    "<textarea id='chutney-debug-description' name='description'></textarea>",
+                    "<br /><br /><input type='button' value='Submit Report' onclick='chutney.debug();' />",
+                "</form>",
+            "</div>"
+        ].join("")).slideDown('fast');
+        $('#chutney .chutney-main-content').slideUp('fast');
+        $('#chutney .chutney-scrape').hide().after('<a class="chutney-back" href="javascript:void(0)" onclick="chutney.hideDebug()">Back to Transactions</a>')
+    },
+    hideDebug: function() {
+        $('.chutney-scrape,.chutney-main-content').show();
+        $('.chutney-back').remove();
+        $('.chutney-message').html('');
+    },
+    debug: function(doc, callback, main) {
         if (!doc || !doc.location) doc = document;
+        
+        if (typeof main == 'undefined') main = true;
         
         var page = $(doc).find('html').clone();
         page.find('script[src*=' + CHUTNEY_SERVER_URL + '],link[href*=' + CHUTNEY_SERVER_URL + '],#chutney,#exposeMask').remove();
-
+        
         var pathname = doc.location.pathname;
         if (pathname && pathname.charAt(pathname.length - 1) != '/') {
             var pathparts = pathname.split('/');
@@ -1175,7 +1210,7 @@ var chutney = {
         }
         var href = doc.location.protocol + '//' + doc.location.host + pathname;
         page.find('head').append('<base href="' + href + '" />');
-
+        
         page.find('link,script').each(function() {
             var $this = $(this);
             var attr = $this.attr('href') ? 'href' : 'src';
@@ -1187,20 +1222,28 @@ var chutney = {
                 $this.attr(attr, href + url);
             }
         })
-
+        
         if (chutney.frameset && chutney.frameset.get(0).ownerDocument == doc) {
             page.find('body').remove();
             page.append(chutney.frameset);
         }
-
+        
         var postMessage = function() {
-            $.post(CHUTNEY_SERVER_URL + '/debug/', {'title': document.title, 'page': '<!DOCTYPE html><html>' + page.html() + '</html>'}, function(data) {
+            var description = chutney.div.find('.chutney-message textarea[name=description]').val();
+            if (!description) description = "";
+            
+            var email = chutney.div.find('.chutney-message input[name=email]').val();
+            if (!email) email = "";
+            $.post(CHUTNEY_SERVER_URL + '/debug/', {'title': document.title, 'page': '<!DOCTYPE html><html>' + page.html() + '</html>', 'email': email, 'description': description, 'main_page': main}, function(data) {
                 if (callback) {
                     callback(data);
                 }
+                if (main) {
+                    $('#chutney .chutney-message-content').html('Your report has been submitted, and has been given a tracking ID of <strong>' + data + '</strong>.')
+                }
             })
         }
-
+        
         if (page.find('frame').length > 0) {
             var frameCount = 0;
             var frames = page.find('frame');
@@ -1221,12 +1264,13 @@ var chutney = {
                             if (frameCount == frames.length) {
                                 postMessage();
                             }
-                        })
+                        }, false)
                     }
                 });
                 iframe.attr('src', $(frame).attr('src'));
             })
         } else {
+            page.find('body').anonymizeNumbers();
             postMessage();
         }
     }
