@@ -9,6 +9,10 @@ urlpatterns = patterns('',
     (r'', include('chutney_server.chutney.urls')),
 )
 if settings.DEBUG:
+    import os
+    urlpatterns += patterns('',
+        (r'^admin_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.dirname(admin.__file__) + '/media'}),
+    )
     urlpatterns += patterns('',
         (r'^media/(?P<path>.*)$',
             'django.views.static.serve',
