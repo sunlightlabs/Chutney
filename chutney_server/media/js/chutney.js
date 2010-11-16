@@ -92,7 +92,7 @@ if (typeof String.trim === "undefined") {
 }
 
 var PARTY_COLORS = {"Republicans": "#E60002", "Democrats": "#186582", "Other": "#DCDDDE"};
-function minipie(div, data) {
+function minipie(div, data, large) {
     // data should be a mapping of { party: amount }
 
     // check to make sure it isn't empty.
@@ -113,26 +113,45 @@ function minipie(div, data) {
         slices.push({
             'color': color,
             // without a minimum value, things get funny
-            'value': data[key] ? data[key] : 0.01
+            'value': data[key] ? data[key] : 0.01,
+            'name': key
         });
     });
     slices.sort(function(a, b) { return b.value - a.value });
     var values = [];
     var colors = [];
+    var names = [];
+    var sum = 0;
     $.each(slices, function(i, s) {
         values.push(s.value);
         colors.push(s.color);
+        names.push(s.name);
+        sum += s.value;
     });
 
     var lbl = undefined;
-    pie = r.g.piechart(20, 20, 17, values, {
-        colors: colors,
-        strokewidth: 0
-    });
+    if (large) {
+        pie = r.g.piechart(65, 65, 50, values, {
+            colors: colors,
+            strokewidth: 0,
+            legend: names,
+            legendpos: 'east'
+        });
+    } else {
+        pie = r.g.piechart(20, 20, 17, values, {
+            colors: colors,
+            strokewidth: 0
+        });
+    }
     pie.hover(function() {
         this.sector.stop();
-        this.sector.scale(1.2, 1.2, this.cx, this.cy);
-        lbl = r.text(30, 50, floatToDollars(this.value.value));
+        if (large) {
+            this.sector.scale(1.1, 1.1, this.cx, this.cy);
+            lbl = r.text(65, 130, (Math.round(this.value.value / sum * 1000) / 10) + '%');
+        } else {
+            this.sector.scale(1.2, 1.2, this.cx, this.cy);
+            lbl = r.text(30, 50, floatToDollars(this.value.value));
+        }
         lbl.attr({"font-weight": 800, "font-size": "12px"});
         lbl.show();
     }, function() {
@@ -546,6 +565,10 @@ var chutney = {
                     "</div>",
                     
                     "<div class='chutney-main-content'>",
+                        "<h3>Total party donations weighted by your purchase amounts</h3>",
+                        "<div class='chutney-party-breakdown-large' id='partyorg-overall'></div>",
+                        "<div class='chutney-about'></div>",
+                        "<div class='clear'></div>",
                         "<h2>Your Transactions (<span class='chutney-start-date'></span> &ndash; ", 
                                                 "<span class='chutney-end-date'></span>)</h2>",
                         "<div class='chutney-viewmode'><span id='filterTitle'>View</span><ul>",
@@ -623,6 +646,10 @@ var chutney = {
         // part 2 of firefox hack
         if ($.browser.mozilla && chutney.frameset) {
             overlayDiv.css('top', 0);
+            var mask = $('#exposeMask');
+            if (mask.height() < chutney.div.height()) {
+                mask.addClass('chutney-height-hack');
+            }
         }
     },
 
@@ -757,9 +784,19 @@ var chutney = {
                      "<th class='chutney-sort", chutney.sortBy == 'amount' ? sortClass : '',
                         "' onclick='chutney.sortTransactions(\"amount\"); return false;'>Amount</th>",
                     "</tr>"].join(""));
+        chutney.totalPb = {};
+        chutney.sums = {'matched': 0, 'total': 0};
         $.each(corps, function(i, orgName) {
             table.append(chutney.buildTxRow(orgName));
         });
+        
+        chutney.postLoadQueue.push(function() {
+            minipie('partyorg-overall', chutney.totalPb, true);
+        });
+        
+        chutney.div.find('.chutney-main-content .chutney-about').html(
+            'Checking Influence identified political activity for ' + floatToDollars(chutney.sums['matched']) + ' out of the ' + floatToDollars(chutney.sums['total']) + ' listed on your bank statement.'
+        );
                         
         $(".chutney-transactions").html(table);
         chutney.setViewMode();
@@ -824,11 +861,17 @@ var chutney = {
             for (var party in org.corp.party_breakdown) {
                 pb[party] = Math.round(parseFloat(org.corp.party_breakdown[party][1]));
                 totalGiven += pb[party];
+                
+                var totalVal = pb[party] * org.amount;
+                chutney.totalPb[party] ? chutney.totalPb[party] += totalVal : chutney.totalPb[party] = totalVal;
             }
             var partyBreakdownId = "party" + org.uniqueClass;
             chutney.postLoadQueue.push(function() {
                 minipie(partyBreakdownId, pb);
             });
+            
+            chutney.sums['matched'] += org.amount;
+            chutney.sums['total'] += org.amount;
 
             out = ["<tr class='chutney-tx chutney-matched ", tooltipTriggerClass, " ", org.uniqueClass, " chutney-expanded'>",
                         "<td class='chutney-carat'>",
@@ -860,6 +903,7 @@ var chutney = {
                     "</tr>"].join("");
         } else {
             // Unmatched organization
+            chutney.sums['total'] += org.amount;
             out = ["<tr class='chutney-tx chutney-unmatched ", tooltipTriggerClass, " ", org.uniqueClass, "'>",
                         "<td></td>",
                         tx_desc_td,

@@ -34,6 +34,7 @@
 
 #chutney h1, .chutney-dialog h1 { text-indent: -9999em; display: block; background: url(../img/logo.png) top left no-repeat; width: 230px; height: 87px; float: left; margin: 0 20px 0 0;}
 #chutney h2 { font-size: 180%; text-transform: uppercase; color: #000000; margin-bottom: 20px;}
+#chutney h3 { font-size: 120%; text-transform: uppercase; color: #000000; margin-bottom: 5px;}
 #chutney .chutney-transactions h3 { font-weight: bold; color: #585352; margin-bottom: 5px; }
 
 #chutney .chutney-name a .transactionName, #chutney .chutney-corp-name a { font-size: 110%; font-weight: bold;}
@@ -179,6 +180,17 @@
   height: 60px;
   float: left;
 }
+#chutney div.chutney-party-breakdown-large {
+  width: 240px;
+  height: 140px;
+  float: left;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-right: 1px dashed #DCDCD8;
+  margin-right: 20px;
+}
+
+.chutney-height-hack { height: 100% !important; } /* firefox mask hack */
 
 #chutney .ui-icon-triangle-1-s { display: block; width: 16px; height: 16px; background-image: url(south-street/images/ui-icons_808080_256x240.png); background-position: -64px -16px; }
 #chutney .ui-icon-triangle-1-e { display: block; width: 16px; height: 16px; background-image: url(south-street/images/ui-icons_808080_256x240.png); background-position: -32px -16px; }
