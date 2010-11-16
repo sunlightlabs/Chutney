@@ -600,6 +600,7 @@ var chutney = {
         }
         overlayDiv.overlay({
             onClose: function() {
+                $('#exposeMask').unbind('click.closeDiv');
                 if (chutney.frameset) {
                     // rather than trying to rebuild a frameset, just
                     // reload the page on close.
@@ -607,6 +608,7 @@ var chutney = {
                 }
             },
             close: '.chutney-close',
+            closeOnClick: false,
             mask: {
                 color: '#2b2922',
                 loadSpeed: 200,
@@ -616,6 +618,7 @@ var chutney = {
             fixed: false,
             load: true
         });
+        $('#exposeMask').bind('click.closeDiv', function() { overlayDiv.overlay().close(); });
         
         // part 2 of firefox hack
         if ($.browser.mozilla && chutney.frameset) {
