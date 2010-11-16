@@ -406,12 +406,13 @@ var chutney = {
     start: function() {
         // Load css
         if (!scriptsInserted) {
+            var time = (new Date()).getTime();
             var head = document.getElementsByTagName("head")[0];
             for (var i = 0; i < stylesheets.length; i++) {
                 var css = document.createElement("link");
                 css.rel = "stylesheet";
                 css.type = "text/css";
-                css.href = stylesheets[i];
+                css.href = stylesheets[i] + "?" + time;
                 css.media = "all";
                 head.appendChild(css);
             }
