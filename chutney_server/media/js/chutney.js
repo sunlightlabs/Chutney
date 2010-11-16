@@ -1153,7 +1153,7 @@ var chutney = {
             $(".chutney-loading").prepend("<ul class='chutney-recipe'></ul>");
         }
         if (!chutney.recipeDone) {
-            $(".chutney-recipe").append("<li>" + chutney.recipes[chutney.recipeIndex] + "</li>");
+            //$(".chutney-recipe").append("<li>" + chutney.recipes[chutney.recipeIndex] + "</li>");
             if (chutney.recipeIndex + 1 < chutney.recipes.length) {
                 chutney.recipeIndex += 1;
             }
