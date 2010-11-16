@@ -32,7 +32,7 @@
 #chutney p { margin-bottom: 1em; }
 #chutney strong { font-weight: bold; }
 
-#chutney h1 { text-indent: -9999em; display: block; background: url(../img/logo.png) top left no-repeat; width: 230px; height: 87px; float: left; margin: 0 20px 0 0;}
+#chutney h1, .chutney-dialog h1 { text-indent: -9999em; display: block; background: url(../img/logo.png) top left no-repeat; width: 230px; height: 87px; float: left; margin: 0 20px 0 0;}
 #chutney h2 { font-size: 180%; text-transform: uppercase; color: #000000; margin-bottom: 20px;}
 #chutney .chutney-transactions h3 { font-weight: bold; color: #585352; margin-bottom: 5px; }
 
@@ -49,6 +49,8 @@
 #chutney textarea { width: 40em; height: 5em; }
 
 .chutney-dialog { background: #fff; padding: 20px; overflow: visible; text-align: left; }
+.chutney-dialog div.chutney-close { padding: 5px; color: #0a6e92; background: #ddeeff; display: inline-block; margin-top: 4px; cursor: pointer; }
+.chutney-error p { clear: both; }
 
 #chutney .chutney-about { font-style: oblique; color: #827D7D; font-family: Georgia, "Times New Roman", Times, serif; width: 550px; margin-bottom: 0; float: left; margin-top: 42px;}
 #chutney .transactionNumber, #chutney .totalGiven { font-family: Georgia, "Times New Roman", Times, serif; font-style: oblique; font-size: 95%; margin-left: 15px;}

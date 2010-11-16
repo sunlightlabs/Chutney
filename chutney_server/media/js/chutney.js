@@ -400,7 +400,7 @@ var chutney = {
         }
 
         if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1 && document.location.href.indexOf('debug') == -1) {
-            $("<div class='chutney-dialog' style='width: 400px; display: none;'>")
+            $("<div class='chutney-dialog chutney-error' style='width: 400px; display: none;'>")
                 .html("<h1>Chutney bookmarklet</h1><p>This is a bookmarklet, not a link &ndash; " +
                       "to use it, drag that " +
                       "'chutney' up to your bookmarks toolbar, or " +
@@ -417,7 +417,6 @@ var chutney = {
                         loadSpeed: 200,
                         opacity: 0.9
                     },
-                    closeOnClick: false,
                     oneInstance: false,
                     fixed: false,
                     load: true
@@ -435,21 +434,23 @@ var chutney = {
         chutney.setUpHtml();
         if (chutney.txdata.txs.length == 0) {
             // No transactions found -- display message then exit.
-            $("<div class='chutney-dialog' style='width: 400px; display: none;'>")
-                .html("<h1>No transactions found</h1><p>Sorry, we couldn't find any transactions on this page.</p><div class='chutney-close'>Shucks</div>")
-                .appendTo(document.body)
-                .overlay({
-                    close: '.chutney-close',
-                    mask: {
-                        color: '#2b2922',
-                        loadSpeed: 200,
-                        opacity: 0.9
-                    },
-                    closeOnClick: false,
-                    oneInstance: false,
-                    fixed: false,
-                    load: true
-                });
+            chutney.div.overlay().close();
+            setTimeout(function() {
+                $("<div class='chutney-dialog chutney-error' style='width: 400px; display: none;'>")
+                    .html("<h1>No transactions found</h1><p>Sorry, we couldn't find any transactions on this page.</p><div class='chutney-close'>Shucks</div>")
+                    .appendTo(document.body)
+                    .overlay({
+                        close: '.chutney-close',
+                        mask: {
+                            color: '#2b2922',
+                            loadSpeed: 200,
+                            opacity: 0.9
+                        },
+                        oneInstance: false,
+                        fixed: false,
+                        load: true
+                    })
+            }, 500);
             return;
         } 
         chutney.recipe();
@@ -493,21 +494,23 @@ var chutney = {
     apiTimeout: function() {
         // Error -- timeout                
         chutney.recipeDone = true;
-        var div = $("<div class='chutney-dialog' style='display: none; width: 400px;'>");
-        div.html("<p>Error communicating with server.</p><div class='chutney-close'>Got it</div>")
-        .appendTo(document.body)
-        .overlay({
-            close: '.chutney-close',
-            mask: {
-                color: '#2b2922',
-                loadSpeed: 200,
-                opacity: 0.9
-            },
-            closeOnClick: false,
-            oneInstance: false,
-            fixed: false,
-            load: true
-        });
+        chutney.div.overlay().close();
+        setTimeout(function() {
+            var div = $("<div class='chutney-dialog chutney-error' style='display: none; width: 400px;'>");
+            div.html("<p>Error communicating with server.</p><div class='chutney-close'>Got it</div>")
+            .appendTo(document.body)
+            .overlay({
+                close: '.chutney-close',
+                mask: {
+                    color: '#2b2922',
+                    loadSpeed: 200,
+                    opacity: 0.9
+                },
+                oneInstance: false,
+                fixed: false,
+                load: true
+            });
+        }, 500);
     },            
     /*
     *  Create the overlay in which we will display things
@@ -609,7 +612,6 @@ var chutney = {
                 loadSpeed: 200,
                 opacity: 0.9
             },
-            closeOnClick: false,
             oneInstance: false,
             fixed: false,
             load: true
