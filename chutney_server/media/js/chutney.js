@@ -1269,7 +1269,11 @@ var chutney = {
             if (!url) return;
             
             if (url.split('://').length <= 1) {
-                $this.attr(attr, href + url);
+                if (url.charAt(0) == '/') {
+                    $this.attr(attr, doc.location.protocol + '//' + doc.location.host + url);
+                } else {
+                    $this.attr(attr, href + url);
+                }
             }
         })
         
