@@ -792,6 +792,7 @@ var chutney = {
         });
         
         chutney.postLoadQueue.push(function() {
+            $('#partyorg-overall').html('');
             minipie('partyorg-overall', chutney.totalPb, true);
         });
         
@@ -1074,39 +1075,44 @@ var chutney = {
                 return false;
             });
         }
-/*        input.autocomplete({
-            minLength: 2,
-            // get list of names from chutney server.
-            source: function(request, responseCallback) {
-                if (request.term.length > 1) {
-                    $.getJSON(NAME_SEARCH_URL + "?callback=?", request, function(data) {
-                        responseCallback(data);
-                        var cleaned = clean(request.term);
-                        for (var i = 0; i < data.length; i++) {
-                            if (cleaned == clean(data[i])) {
-                                input.removeClass("chutney-bad-name");
-                                submit.removeAttr("disabled");
-                                break;
+        input.autocomplete(
+            NAME_SEARCH_URL,
+            {
+                dataType: 'jsonp',
+                parse: function(data) { return $.map(data, function(el) { return {data: [el, el], value: el, result: el } }) },
+                minLength: 2,
+                // get list of names from chutney server.
+                /* source: function(request, responseCallback) {
+                    if (request.term.length > 1) {
+                        $.getJSON(NAME_SEARCH_URL + "?callback=?", request, function(data) {
+                            responseCallback(data);
+                            var cleaned = clean(request.term);
+                            for (var i = 0; i < data.length; i++) {
+                                if (cleaned == clean(data[i])) {
+                                    input.removeClass("chutney-bad-name");
+                                    submit.removeAttr("disabled");
+                                    break;
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+                }, */ 
+                search: function(event, ui) {
+                    input.addClass("chutney-bad-name");
+                    submit.attr("disabled", "disabled");
+                },
+                change: function(event, ui) {
+                    if (!$(this).hasClass("chutney-bad-name") 
+                            && !$(this).attr("disabled") 
+                            && $(this).val().length > 0) {
+                        doEditMatch();
+                    }
+                },
+                select: function(event, ui) {
+                    doEditMatch(ui.item.value);
                 }
-            }, 
-            search: function(event, ui) {
-                input.addClass("chutney-bad-name");
-                submit.attr("disabled", "disabled");
-            },
-            change: function(event, ui) {
-                if (!$(this).hasClass("chutney-bad-name") 
-                        && !$(this).attr("disabled") 
-                        && $(this).val().length > 0) {
-                    doEditMatch();
-                }
-            },
-            select: function(event, ui) {
-                doEditMatch(ui.item.value);
             }
-        }).bind({
+        ).bind({
             focus: function(event) {
                 if ($(this).hasClass("chutney-bad-name")) {
                     $(this).autocomplete('search', $(this).val());
@@ -1117,7 +1123,8 @@ var chutney = {
                     $(this).removeClass("chutney-bad-name");
                 }
             }
-        }); */
+        });
+        submit.bind('click', function() { doEditMatch(input.val()) })
     },
     // hack to fix a bug where the dialog displays off screen
     _fixOffset: function () {

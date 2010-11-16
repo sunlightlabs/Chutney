@@ -44,7 +44,7 @@ def name_search(request):
     Expects a GET variable 'term' which contains a term to search against.
     Returns a list of all org names that match the term.
     """
-    term = request.GET.get('term', "")
+    term = request.GET.get('term', request.GET.get('q', ''))
     clean_terms = corp_matcher.clean(term).split()
     orgs = set()
     for name in corp_matcher.corps.keys():
@@ -76,6 +76,7 @@ def assemble_js(request, debug=False):
         root + "g.raphael-min.js",
         root + "g.pie-min.js",
         root + "jquery.tools.min.js",
+        root + "jquery.autocomplete.min.js",
         root + "jquery.cookie.js",
     ]
     
