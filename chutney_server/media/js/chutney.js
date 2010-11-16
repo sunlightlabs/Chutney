@@ -37,21 +37,21 @@ function dollarsToFloat(dollars) {
     dollars = dollars.replace(/[^-0-9\.]/g, "");
     return parseFloat(dollars);
 }
-function floatToDollars(float) {
+function floatToDollars(floatVal) {
     var prefix;
-    if (float < 0) {
+    if (floatVal < 0) {
         prefix = "&ndash;$";
     } else {
         prefix = "$";
     }
-    var parts = /(\d+)\.(\d+)/.exec(Math.abs(float).toFixed(2));
-    var int = parts[1]; 
-    var dec = int.length < 5 ? "." + parts[2] : "";
+    var parts = /(\d+)\.(\d+)/.exec(Math.abs(floatVal).toFixed(2));
+    var intVal = parts[1]; 
+    var dec = intVal.length < 5 ? "." + parts[2] : "";
     var commify = /(\d+)(\d{3})/;
-    while (commify.test(int)) {
-        int = int.replace(commify, '$1' + ',' + '$2');
+    while (commify.test(intVal)) {
+        intVal = intVal.replace(commify, '$1' + ',' + '$2');
     }
-    return [prefix, int, dec].join("");
+    return [prefix, intVal, dec].join("");
 }
 function slugify(string) {
     return string.trim().toLowerCase().replace(/[^-a-z0-9]/g, '-');
@@ -165,7 +165,7 @@ function queryApi(queryNames, successCallback, errorCallback, fuzzy) {
 
     $.getJSON(INFO_SEARCH_URL + "?callback=?", {
             'q': queryNames.join(","), 
-            'fuzzy': fuzzy == undefined ? '1' : fuzzy,
+            'fuzzy': fuzzy == undefined ? '1' : fuzzy
         },
         function(data) {
             clearTimeout(jsonError);
@@ -986,7 +986,7 @@ var chutney = {
         var removeMatch;
         if (org.corp) {
             removeMatch = $(document.createElement("div")).attr({
-                    "style": "text-decoration: underline; cursor: pointer; text-align: center;",
+                    "style": "text-decoration: underline; cursor: pointer; text-align: center;"
                 }).html(
                     "<span>Remove all</span>"
                 );
