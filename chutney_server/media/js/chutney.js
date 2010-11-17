@@ -560,7 +560,7 @@ var chutney = {
                         	" and is a project of the ",
                         	outboundLink("http://sunlightfoundation.com", "Sunlight Foundation"),
                         	". All figures based off of the 2010 election cycle. For more information, see the ",
-                        	outboundLink("http://checking.influenceexplorer.com", "Checking Influence home page",
+                        	outboundLink("http://checking.influenceexplorer.com", "Checking Influence home page"),
                         	".",
                         "</p>",
                         "<div class='clear'></div>",
