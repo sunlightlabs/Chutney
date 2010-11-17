@@ -551,12 +551,14 @@ var chutney = {
         }
         if (chutney.div == undefined) {
             chutney.div = $(["<div id='chutney' class='chutney-dialog' style='display: none; width: 950px; min-height: 500px;'>",
-                "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
                 "<div class='chutney-loading'>", SPINNER, "</div>",
                 "<div class='chutney-content' style='display: none;'>",
                     "<div id='chutneyHeader'>",
+                        "<div id='headerDetails'>",
+                            "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
+                            "<span>See a problem? Help us out by <a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'> reporting it now.</a></span>",
+                        "</div>",
                         "<h1>Checking Influence</h1>",
-                        
                         "<div class='clear'></div>",
                     "</div>",
                     
@@ -607,7 +609,10 @@ var chutney = {
                     "</div>",
                     "<div class='chutney-message'></div>",
                 "</div>",
-                "<a href='javascript:void(0)' class='chutney-close'>Close</a> <a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'>Report a Problem</a>",
+                "<div id='chutney-footer'>",
+                    "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
+                    "<div class='clear'></div>",
+                "</div>",
             "</div>"].join("")).appendTo(document.body);
             // hack to hide other things that may be covering up our dialog
             $('[style*=z-index]').not('#chutney,#exposeMask').each(function() {
@@ -1046,9 +1051,8 @@ var chutney = {
         var removeMatch;
         if (org.corp) {
             removeMatch = $(document.createElement("div")).attr({
-                    "style": "text-decoration: underline; cursor: pointer; text-align: center;"
                 }).html(
-                    "<span>Remove all</span>"
+                    "<span id='chutney-removeTransaction'>Can't find the right match? <a href='#'>Mark as a non-matching transaction.</a></span>"
                 );
         } else {
             removeMatch = "";
@@ -1059,7 +1063,7 @@ var chutney = {
                 closeIcon(function() { $(".chutney-editor").remove(); }),
                 // label
                 $("<div id='enityEditor'>" ).append(
-                    org.txs.length > 1 ? "<span>These transactions match: </span>" : "<span>This transaction matches: </span>",
+                    org.txs.length > 1 ? "<span>Find the company that fits your transactions best: </span>" : "<span>Find the company that fits your transaction best: </span>",
                     // inputs
                     input,
                     submit,

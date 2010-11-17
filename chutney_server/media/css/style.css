@@ -44,14 +44,18 @@
 #chutney .clear { clear: both; display: block;}
 
 #chutney #chutneyHeader { border-bottom:1px dashed #DCDCD8; padding-bottom: 10px;}
-#chutney #chutney_mainContent, #chutney #chutneyHeader { padding: 20px 20px 10px;}
+#chutney #chutney_mainContent, #chutney #chutneyHeader, #chutney #chutney-footer, #chutney .chutney-loading, .chutney-message { padding: 20px 20px 10px;}
 #chutney .chutney-even { background-color: #F5F4F4; }
+#chutney #headerDetails { float: right;}
+#chutney #chutneyHeader span { margin-top: 60px; display: block;}
+#chutney #chutneyHeader span a { margin-left: 6px;}
 
 #chutney input, #chutney textarea { margin: auto; background-color: #efeeec; border: 1px solid #dedcd8; padding: 5px; margin-right: 15px;}
 #chutney textarea { width: 40em; height: 5em; }
 
 .chutney-dialog { background: #fff; overflow: visible; text-align: left; }
 .chutney-dialog div.chutney-close { padding: 5px; color: #0a6e92; background: #ddeeff; display: inline-block; margin-top: 4px; cursor: pointer; }
+#chutneyHeader .chutney-close, #chutney-footer .chutney-close { float:right; background: url(../img/delete_16.png) top left no-repeat; padding-left: 20px;}
 .chutney-error { padding: 20px; }
 .chutney-error p { clear: both; }
 
@@ -75,8 +79,10 @@
 
 #chutney .recipientsList a { text-transform: capitalize;}
 
-#chutney #enityEditor { margin: 10px 0;}
-#chutney #enityEditor span { display: block; margin-bottom: 5px;}
+#chutney #enityEditor { margin: 10px 0 20px;}
+#chutney #enityEditor span { display: block; margin-bottom: 5px; }
+#chutney #enityEditor span a { font-weight: normal; font-size:100%;}
+#chutney-removeTransaction { margin: 10px 0; font-size:90%;}
 
 #chutney .chutney-message label { display: block; font-weight: bold; margin-top: 10px; }
 
