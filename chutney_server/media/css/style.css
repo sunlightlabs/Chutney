@@ -52,6 +52,7 @@
 
 .chutney-dialog { background: #fff; overflow: visible; text-align: left; }
 .chutney-dialog div.chutney-close { padding: 5px; color: #0a6e92; background: #ddeeff; display: inline-block; margin-top: 4px; cursor: pointer; }
+.chutney-error { padding: 20px; }
 .chutney-error p { clear: both; }
 
 #chutneyDescription { float: left; width: 200px; margin-right: 30px; padding-right: 30px; border-right: 1px dashed #DCDCD8;}
