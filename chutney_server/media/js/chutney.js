@@ -551,6 +551,7 @@ var chutney = {
         }
         if (chutney.div == undefined) {
             chutney.div = $(["<div id='chutney' class='chutney-dialog' style='display: none; width: 950px; min-height: 500px;'>",
+                "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
                 "<div class='chutney-loading'>", SPINNER, "</div>",
                 "<div class='chutney-content' style='display: none;'>",
                     "<div id='chutneyHeader'>",
