@@ -312,7 +312,7 @@ function autoDetectTxs() {
     }
 
     $(docs).find('table').each(function() {
-        var descIndex = $(this).find('tr:has(th)').eq(0).children(':contains(Description)').index();
+        var descIndex = $(this).find('tr:has(th),tr:first-child').eq(0).children(':contains(Description)').index();
         $(this).find("tr").each(function(index) {
             var params = {};
             $(this).children("td").each(function() {
@@ -371,12 +371,12 @@ function autoDetectTxs() {
                 // Transaction strings: They're between 5 and 100 characters long,
                 // and (contain at least one number OR they're in a field with class
                 // 'desc' OR they're in a column with a title containing the word
-                // 'Description')
+                // 'Description') and contain at least one character
                 var $this = $(this);
                 var textOptions = [text, $this.attr("title")];
                 for (var i = 0; i < textOptions.length; i++) {
                     var str = textOptions[i];
-                    if (str.length > 5 && str.length < 100 && (str.search(/[0-9]/) != -1 || $this.hasClass('desc') || $this.index() == descIndex)) {
+                    if (str.length > 5 && str.length < 100 && (str.search(/[0-9]/) != -1 || $this.hasClass('desc') || $this.index() == descIndex) && str.search(/[a-zA-Z]/) != -1) {
                         params.orig = str;
                         return;
                     }
