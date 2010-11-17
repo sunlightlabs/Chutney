@@ -3,3 +3,5 @@
 .sass-cache
 local_settings.py
 test_files/*
+.pydevproject
+.project
