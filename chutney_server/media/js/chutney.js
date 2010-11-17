@@ -1063,7 +1063,7 @@ var chutney = {
                 closeIcon(function() { $(".chutney-editor").remove(); }),
                 // label
                 $("<div id='enityEditor'>" ).append(
-                    org.txs.length > 1 ? "<span>Find the company that fits your transactions best: </span>" : "<span>Find the company that fits your transaction best: </span>",
+                    org.txs.length > 1 ? "<span style='font-weight: bold;'>Find the company that fits your transactions best: </span>" : "<span style='font-weight: bold;'>Find the company that fits your transaction best: </span>",
                     // inputs
                     input,
                     submit,
