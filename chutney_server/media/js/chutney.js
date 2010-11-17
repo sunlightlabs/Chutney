@@ -556,7 +556,7 @@ var chutney = {
                     "<div id='chutneyHeader'>",
                         "<div id='headerDetails'>",
                             "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
-                            "<span>See a problem? Help us out by <a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'> reporting it now.</a></span>",
+                            "<span class='chutney-header-text'><span class='chutney-header-nonlink'>See a problem? Help us out by </span><a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'> reporting it now.</a></span>",
                         "</div>",
                         "<h1>Checking Influence</h1>",
                         "<div class='clear'></div>",
@@ -622,7 +622,7 @@ var chutney = {
                 }
             })
             /* enable debugging */
-            var debug = chutney.div.find('.chutney-scrape');
+            var debug = chutney.div.find('.chutney-header-text');
             CHUTNEY_DEBUG || debug.remove();
         } else {
             $('#chutney').removeData('overlay');
@@ -1256,10 +1256,11 @@ var chutney = {
             "</div>"
         ].join("")).slideDown('fast');
         $('#chutney .chutney-main-content').slideUp('fast');
+        $('#chutney .chutney-header-nonlink').hide();
         $('#chutney .chutney-scrape').hide().after('<a class="chutney-back" href="javascript:void(0)" onclick="chutney.hideDebug()">Back to Transactions</a>')
     },
     hideDebug: function() {
-        $('.chutney-scrape,.chutney-main-content').show();
+        $('.chutney-scrape,.chutney-main-content,#chutney .chutney-header-nonlink').slideDown('fast');
         $('.chutney-back').remove();
         $('.chutney-message').html('');
     },

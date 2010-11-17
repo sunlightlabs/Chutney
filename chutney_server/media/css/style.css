@@ -44,10 +44,10 @@
 #chutney .clear { clear: both; display: block;}
 
 #chutney #chutneyHeader { border-bottom:1px dashed #DCDCD8; padding-bottom: 10px;}
-#chutney #chutney_mainContent, #chutney #chutneyHeader, #chutney #chutney-footer, #chutney .chutney-loading, .chutney-message { padding: 20px 20px 10px;}
+#chutney #chutney_mainContent, #chutney #chutneyHeader, #chutney #chutney-footer, #chutney .chutney-loading, #chutney .chutney-message { padding: 20px 20px 10px;}
 #chutney .chutney-even { background-color: #F5F4F4; }
 #chutney #headerDetails { float: right;}
-#chutney #chutneyHeader span { margin-top: 60px; display: block;}
+#chutney #chutneyHeader span.chutney-header-text { margin-top: 60px; display: block;}
 #chutney #chutneyHeader span a { margin-left: 6px;}
 
 #chutney input, #chutney textarea { margin: auto; background-color: #efeeec; border: 1px solid #dedcd8; padding: 5px; margin-right: 15px;}
