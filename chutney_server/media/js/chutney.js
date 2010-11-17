@@ -312,7 +312,7 @@ function autoDetectTxs() {
     }
 
     $(docs).find('table').each(function() {
-        var descIndex = $(this).find('tr:has(th)').eq(0).children(':contains(Description)').index();
+        var descIndex = $(this).find('tr:has(th),tr:first-child').eq(0).children(':contains(Description)').index();
         $(this).find("tr").each(function(index) {
             var params = {};
             $(this).children("td").each(function() {
@@ -371,12 +371,12 @@ function autoDetectTxs() {
                 // Transaction strings: They're between 5 and 100 characters long,
                 // and (contain at least one number OR they're in a field with class
                 // 'desc' OR they're in a column with a title containing the word
-                // 'Description')
+                // 'Description') and contain at least one character
                 var $this = $(this);
                 var textOptions = [text, $this.attr("title")];
                 for (var i = 0; i < textOptions.length; i++) {
                     var str = textOptions[i];
-                    if (str.length > 5 && str.length < 100 && (str.search(/[0-9]/) != -1 || $this.hasClass('desc') || $this.index() == descIndex)) {
+                    if (str.length > 5 && str.length < 100 && (str.search(/[0-9]/) != -1 || $this.hasClass('desc') || $this.index() == descIndex) && str.search(/[a-zA-Z]/) != -1) {
                         params.orig = str;
                         return;
                     }
@@ -554,23 +554,34 @@ var chutney = {
                 "<div class='chutney-loading'>", SPINNER, "</div>",
                 "<div class='chutney-content' style='display: none;'>",
                     "<div id='chutneyHeader'>",
+                        "<div id='headerDetails'>",
+                            "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
+                            "<span class='chutney-header-text'><span class='chutney-header-nonlink'>See a problem? Help us out by </span><a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'> reporting it now.</a></span>",
+                        "</div>",
                         "<h1>Checking Influence</h1>",
-                        "<p class='chutney-about'>Checking Influence is based off of ",
-                        	outboundLink("http://influenceexplorer.com", "Influence Explorer"),
-                        	" and is a project of the ",
-                        	outboundLink("http://sunlightfoundation.com", "Sunlight Foundation"),
-                        	". All figures based off of the 2010 election cycle. For more information, see the ",
-                        	outboundLink("http://checking.influenceexplorer.com", "Checking Influence home page",
-                        	".",
-                        "</p>",
                         "<div class='clear'></div>",
                     "</div>",
                     
                     "<div class='chutney-main-content'>",
-                        "<h3>Total party donations weighted by your purchase amounts</h3>",
-                        "<div class='chutney-party-breakdown-large' id='partyorg-overall'></div>",
-                        "<div class='chutney-about'></div>",
-                        "<div class='clear'></div>",
+                        "<div id='chutney-feature'>",
+                            "<div id='chutneyDescription'>",
+                                "<p class='chutney-about'>Checking Influence is based off of ",
+                                	outboundLink("http://influenceexplorer.com", "Influence Explorer"),
+                                	" and is a project of the ",
+                                	outboundLink("http://sunlightfoundation.com", "Sunlight Foundation"),
+                                	". All figures based off of the 2010 election cycle. For more information, see the ",
+                                	outboundLink("http://checking.influenceexplorer.com", "Checking Influence home page"),
+                                	".",
+                                "</p>",
+                            "</div>",
+                            "<div id='chutneyChart'>",
+                                "<h3>Total party donations weighted by your purchase amounts</h3>",
+                                "<p class='chutney-about' id='chutney-chartAbout'></p>",
+                                "<div class='chutney-party-breakdown-large' id='partyorg-overall'></div>",
+                            "</div>",
+                            "<div class='clear'></div>",
+                        "</div>",
+                        "<div id='chutney_mainContent'>",
                         "<h2>Your Transactions (<span class='chutney-start-date'></span> &ndash; ", 
                                                 "<span class='chutney-end-date'></span>)</h2>",
                         "<div class='chutney-viewmode'><span id='filterTitle'>View</span><ul>",
@@ -595,9 +606,13 @@ var chutney = {
                         "</div>",
                         "<div class='chutney-transactions'></div>",
                     "</div>",
+                    "</div>",
                     "<div class='chutney-message'></div>",
                 "</div>",
-                "<a href='javascript:void(0)' class='chutney-close'>Close</a> <a href='javascript:void(0)' onclick='chutney.debugMessage();' class='chutney-scrape'>Report a Problem</a>",
+                "<div id='chutney-footer'>",
+                    "<a href='javascript:void(0)' class='chutney-close'>Close</a>",
+                    "<div class='clear'></div>",
+                "</div>",
             "</div>"].join("")).appendTo(document.body);
             // hack to hide other things that may be covering up our dialog
             $('[style*=z-index]').not('#chutney,#exposeMask').each(function() {
@@ -607,7 +622,7 @@ var chutney = {
                 }
             })
             /* enable debugging */
-            var debug = chutney.div.find('.chutney-scrape');
+            var debug = chutney.div.find('.chutney-header-text');
             CHUTNEY_DEBUG || debug.remove();
         } else {
             $('#chutney').removeData('overlay');
@@ -797,7 +812,7 @@ var chutney = {
             minipie('partyorg-overall', chutney.totalPb, true);
         });
         
-        chutney.div.find('.chutney-main-content .chutney-about').html(
+        chutney.div.find('.chutney-main-content #chutney-chartAbout').html(
             'Checking Influence identified political activity for ' + floatToDollars(chutney.sums['matched']) + ' out of the ' + floatToDollars(chutney.sums['total']) + ' listed on your bank statement.'
         );
                         
@@ -1036,9 +1051,8 @@ var chutney = {
         var removeMatch;
         if (org.corp) {
             removeMatch = $(document.createElement("div")).attr({
-                    "style": "text-decoration: underline; cursor: pointer; text-align: center;"
                 }).html(
-                    "<span>Remove all</span>"
+                    "<span id='chutney-removeTransaction'>Can't find the right match? <a href='#'>Mark as a non-matching transaction.</a></span>"
                 );
         } else {
             removeMatch = "";
@@ -1049,7 +1063,7 @@ var chutney = {
                 closeIcon(function() { $(".chutney-editor").remove(); }),
                 // label
                 $("<div id='enityEditor'>" ).append(
-                    org.txs.length > 1 ? "<span>These transactions match: </span>" : "<span>This transaction matches: </span>",
+                    org.txs.length > 1 ? "<span style='font-weight: bold;'>Find the company that fits your transactions best: </span>" : "<span style='font-weight: bold;'>Find the company that fits your transaction best: </span>",
                     // inputs
                     input,
                     submit,
@@ -1242,10 +1256,11 @@ var chutney = {
             "</div>"
         ].join("")).slideDown('fast');
         $('#chutney .chutney-main-content').slideUp('fast');
+        $('#chutney .chutney-header-nonlink').hide();
         $('#chutney .chutney-scrape').hide().after('<a class="chutney-back" href="javascript:void(0)" onclick="chutney.hideDebug()">Back to Transactions</a>')
     },
     hideDebug: function() {
-        $('.chutney-scrape,.chutney-main-content').show();
+        $('.chutney-scrape,.chutney-main-content,#chutney .chutney-header-nonlink').slideDown('fast');
         $('.chutney-back').remove();
         $('.chutney-message').html('');
     },
