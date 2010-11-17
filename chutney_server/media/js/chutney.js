@@ -555,22 +555,30 @@ var chutney = {
                 "<div class='chutney-content' style='display: none;'>",
                     "<div id='chutneyHeader'>",
                         "<h1>Checking Influence</h1>",
-                        "<p class='chutney-about'>Checking Influence is based off of ",
-                        	outboundLink("http://influenceexplorer.com", "Influence Explorer"),
-                        	" and is a project of the ",
-                        	outboundLink("http://sunlightfoundation.com", "Sunlight Foundation"),
-                        	". All figures based off of the 2010 election cycle. For more information, see the ",
-                        	outboundLink("http://checking.influenceexplorer.com", "Checking Influence home page"),
-                        	".",
-                        "</p>",
+                        
                         "<div class='clear'></div>",
                     "</div>",
                     
                     "<div class='chutney-main-content'>",
-                        "<h3>Total party donations weighted by your purchase amounts</h3>",
-                        "<div class='chutney-party-breakdown-large' id='partyorg-overall'></div>",
-                        "<div class='chutney-about'></div>",
-                        "<div class='clear'></div>",
+                        "<div id='chutney-feature'>",
+                            "<div id='chutneyDescription'>",
+                                "<p class='chutney-about'>Checking Influence is based off of ",
+                                	outboundLink("http://influenceexplorer.com", "Influence Explorer"),
+                                	" and is a project of the ",
+                                	outboundLink("http://sunlightfoundation.com", "Sunlight Foundation"),
+                                	". All figures based off of the 2010 election cycle. For more information, see the ",
+                                	outboundLink("http://checking.influenceexplorer.com", "Checking Influence home page"),
+                                	".",
+                                "</p>",
+                            "</div>",
+                            "<div id='chutneyChart'>",
+                                "<h3>Total party donations weighted by your purchase amounts</h3>",
+                                "<p class='chutney-about' id='chutney-chartAbout'></p>",
+                                "<div class='chutney-party-breakdown-large' id='partyorg-overall'></div>",
+                            "</div>",
+                            "<div class='clear'></div>",
+                        "</div>",
+                        "<div id='chutney_mainContent'>",
                         "<h2>Your Transactions (<span class='chutney-start-date'></span> &ndash; ", 
                                                 "<span class='chutney-end-date'></span>)</h2>",
                         "<div class='chutney-viewmode'><span id='filterTitle'>View</span><ul>",
@@ -594,6 +602,7 @@ var chutney = {
                             "<div class='clear'></div>",
                         "</div>",
                         "<div class='chutney-transactions'></div>",
+                    "</div>",
                     "</div>",
                     "<div class='chutney-message'></div>",
                 "</div>",
@@ -797,7 +806,7 @@ var chutney = {
             minipie('partyorg-overall', chutney.totalPb, true);
         });
         
-        chutney.div.find('.chutney-main-content .chutney-about').html(
+        chutney.div.find('.chutney-main-content #chutney-chartAbout').html(
             'Checking Influence identified political activity for ' + floatToDollars(chutney.sums['matched']) + ' out of the ' + floatToDollars(chutney.sums['total']) + ' listed on your bank statement.'
         );
                         
