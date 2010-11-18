@@ -45,10 +45,10 @@
 
 #chutney #chutneyHeader { border-bottom:1px dashed #DCDCD8; padding-bottom: 10px;}
 #chutney #chutney_mainContent, #chutney #chutneyHeader, #chutney #chutney-footer, #chutney .chutney-loading, #chutney .chutney-message { padding: 20px 20px 10px;}
-#chutney .chutney-even { background-color: #F5F4F4; }
-#chutney #headerDetails { float: right;}
-#chutney #chutneyHeader span.chutney-header-text { margin-top: 60px; display: block;}
-#chutney #chutneyHeader span a { margin-left: 6px;}
+#chutney .chutney-even td { background-color: #F5F4F4; }
+#chutney #headerDetails { float: right; width: 500px;}
+#chutney #chutneyHeader span.chutney-header-text { margin-top: 60px; display: block; text-align: right; width: 500px;}
+#chutney #chutneyHeader span a { margin-left: 6px; display: inline;}
 
 #chutney input, #chutney textarea { margin: auto; background-color: #efeeec; border: 1px solid #dedcd8; padding: 5px; margin-right: 15px;}
 #chutney textarea { width: 40em; height: 5em; }
@@ -62,6 +62,7 @@
 #chutneyDescription { float: left; width: 200px; margin-right: 30px; padding-right: 30px; border-right: 1px dashed #DCDCD8;}
 #chutneyChart { float: left; width: 640px;}
 #chutney-feature { padding: 30px 20px; background-color: #f3f4f2; border-bottom:1px dashed #DCDCD8; margin-bottom: 25px;}
+* html #chutney-feature { padding-bottom: -10px;}
 
 #chutney .chutney-about { font-style: oblique; color: #827D7D; font-family: Georgia, "Times New Roman", Times, serif; margin-bottom: 0; float: left;}
 #chutney .transactionNumber, #chutney .totalGiven { font-family: Georgia, "Times New Roman", Times, serif; font-style: oblique; font-size: 95%; margin-left: 15px;}
@@ -125,7 +126,6 @@
 #chutney .chutney-viewmode ul { float: left; }
 #chutney .chutney-viewmode ul li { margin-left: 25px; float: left; }
 
-/* line 94, ././style.sass */
 #chutney table.chutney-transactions {
   border-collapse: collapse;
 }
@@ -136,18 +136,12 @@
   padding: 12px 5px 8px;
   border-bottom: 1px dotted #dddddd;
 }
-/* line 106, ././style.sass */
-#chutney table.chutney-transactions td + td {
-  width: 45%;
-}
-/* line 109, ././style.sass */
-#chutney table.chutney-transactions td + td + td {
-  width: 40%;
-}
-/* line 111, ././style.sass */
-#chutney table.chutney-transactions td + td + td + td {
-  width: 14%;
-}
+
+#chutney .firstColumn { width: 17px; }
+#chutney .secondColumn { width: 457px;}
+#chutney .thirdColumn { width: 275px; }
+#chutney .fourthColumn { width: 120px; }
+#chutney .specialColumn { width: 405px;}
 
 #chutney table.chutney-transactions tr.chutney-tx a.chutney-editlink, #chutney table.chutney-transactions tr.chutney-tx a.chutney-editlink:visited {
   font-weight: normal;
