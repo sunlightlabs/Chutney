@@ -209,7 +209,7 @@ function queryApi(queryNames, successCallback, errorCallback, fuzzy) {
 ****************************************************************/
 function Tx(name, amount, date, orig, order) {
     this.name = name;
-    this.amount = amount;
+    this.amount = Math.abs(amount);
     this.date = date;
     this.orig = orig;
     this.order = order;
