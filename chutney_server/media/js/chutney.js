@@ -833,7 +833,7 @@ var chutney = {
 
         // assemble transaction name parts
         var tx_names = org.txNames.join(", ");
-        var tx_desc_td = ["<td class='chutney-name' title='Click to see transaction details'>",
+        var tx_desc_td = ["<td class='chutney-name secondColumn' title='Click to see transaction details'>",
                             "<a href='javascript:void(0)'><span class='transactionName'>",
                                 tx_names,"</span>", "<span class='transactionNumber'>", org.txs.length, " transaction",
                                                 org.txs.length > 1 ? "s" : "</span>",
@@ -841,7 +841,7 @@ var chutney = {
                             "<span class='ui-icon ui-icon-plus'></span>",
                             "</a>", 
                           "</td>"].join("");
-        var tx_amt_td = ["<td class='chutney-amount'>", floatToDollars(org.amount), "</td>"].join("");
+        var tx_amt_td = ["<td class='chutney-amount fourthColumn'>", floatToDollars(org.amount), "</td>"].join("");
         var tx_edit_link = ["<a class='chutney-editlink' href='javascript:void(0)' ",
                                 "onclick='chutney.openEditor(this, \"", 
                                     escape(orgName), "\"); return false;'>edit</a>",].join("");
@@ -892,7 +892,7 @@ var chutney = {
             chutney.sums['total'] += org.amount;
 
             out = ["<tr class='chutney-tx chutney-matched ", tooltipTriggerClass, " ", org.uniqueClass, " chutney-expanded'>",
-                        "<td class='chutney-carat'>",
+                        "<td class='chutney-carat firstColumn'>",
                             "<a href='javascript:void(0)' onclick='chutney.toggleTx(this); return false;'>",
                                 "<span class='ui-icon ui-icon-triangle-1-s'></span>",
                             "</a>",
@@ -907,12 +907,12 @@ var chutney = {
                     "</tr>",
                     "<tr class='chutney-org chutney-matched ", org.uniqueClass, "'>",
                         "<td></td>",
-                        "<td><h3>Issues this organization has lobbied</h3>", 
+                        "<td class='secondColumn'><h3>Issues this organization has lobbied</h3>", 
                             "<span class='issuesList'>",
                                 issues_list, 
                             "</span>",
                         "</td>",
-                        "<td colspan='2'><h3>Politicians this organization supports</h3>",
+                        "<td class='thirdColumn' colspan='2'><h3>Politicians this organization supports</h3>",
                             "<div class='chutney-party-breakdown' id='", partyBreakdownId, "'></div>",
                             "<span class='recipientsList'>",
                                 recipients_list,
@@ -923,9 +923,9 @@ var chutney = {
             // Unmatched organization
             chutney.sums['total'] += org.amount;
             out = ["<tr class='chutney-tx chutney-unmatched ", tooltipTriggerClass, " ", org.uniqueClass, "'>",
-                        "<td></td>",
+                        "<td class='firstColumn'></td>",
                         tx_desc_td,
-                        "<td class='chutney-corp-name'>",
+                        "<td class='chutney-corp-name thirdColumn'>",
                             "No Matching Organization ",
                             tx_edit_link,
                         "</td>",
