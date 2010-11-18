@@ -265,7 +265,7 @@ function cleanTxName(orig) {
     string = string.replace(/\.(?!(com|org|net))/gi, ' ');
 
     // 3. Remove stop words.
-    string = string.replace(/(^|\s)(ACCT|AUTH|AUTOMATED|CHECKCARD|DEP|DEPOSIT|DES|ID|INST|ONLINE|POS|PURCHASE|STATEMENT NAME|TX|WITHDRAW|WITHDRAWL|WITHDRWL|WWW|XFER)(?=$|\s)/gi, "");
+    string = string.replace(/(^|\s)(ACCT|AUTH|AUTOMATED|CHECK CARD|CHECKCARD|DEBIT CARD|DEBITCARD|DEBIT|DEP|DEPOSIT|DES|ID|INST|ONLINE|POS|PURCHASE|STATEMENT NAME|TX|VISA|WITHDRAW|WITHDRAWL|WITHDRWL|WITHDRAWAL|WWW|XFER)(?=$|\s)/gi, "");
 
     // 4. Remove extraneous whitespace.
     string = string.trim().replace(/\s+/g, ' ');

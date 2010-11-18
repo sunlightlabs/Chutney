@@ -10,6 +10,6 @@ urlpatterns = patterns('chutney.views',
     url(r'^debug/(?P<id>\d+)/$', 'debug_view', name='chutney.debug_view'),
     url(r'^$', direct_to_template, {
         'template': 'chutney/home.html', 
-        'extra_context': {'SERVER_URL': settings.SERVER_URL, 'FORCE_HTTPS': settings.FORCE_HTTPS}
+        'extra_context': {'SERVER_URL': settings.SERVER_URL, 'FORCE_HTTPS': settings.FORCE_HTTPS, 'IE_MEDIA_URL': settings.IE_MEDIA_URL}
     }, name='home')
 )

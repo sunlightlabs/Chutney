@@ -105,6 +105,8 @@ AGGREGATES_API_BASE_URL = "http://transparencydata.com/api/1.0/"
 
 FORCE_HTTPS = True
 
+IE_MEDIA_URL = 'http://s3.amazonaws.com/assets.sunlightfoundation.com/brisket/1.0/'
+
 try:
     from local_settings import *
 except:
