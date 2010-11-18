@@ -909,7 +909,7 @@ var chutney = {
                         "<td></td>",
                         "<td><h3>Issues this organization has lobbied</h3>", 
                             "<span class='issuesList'>",
-                                issues_list, 
+                                issues_list ? issues_list : "<div class='chutney-no-activity'>No lobbying activity.</div>", 
                             "</span>",
                         "</td>",
                         "<td colspan='2'><h3>Politicians this organization supports</h3>",

@@ -66,6 +66,7 @@
 #chutney .chutney-about { font-style: oblique; color: #827D7D; font-family: Georgia, "Times New Roman", Times, serif; margin-bottom: 0; float: left;}
 #chutney .transactionNumber, #chutney .totalGiven { font-family: Georgia, "Times New Roman", Times, serif; font-style: oblique; font-size: 95%; margin-left: 15px;}
 #chutney .totalGiven { color: #666;}
+#chutney .chutney-no-activity { font-family: Georgia, "Times New Roman", Times, serif; font-style: oblique; color: #666; }
 
 #chutney .issuesList { font-size: 95%; color: #666;}
 
