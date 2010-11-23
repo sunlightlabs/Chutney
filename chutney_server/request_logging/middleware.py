@@ -1,4 +1,4 @@
-from chutney_server.logging.models import Request
+from chutney_server.request_logging.models import Request
 from django.core.signals import got_request_exception
 from hashlib import md5
 import re
@@ -22,7 +22,7 @@ class RequestLoggingMiddleware():
             request.META['REMOTE_ADDR'] = request.META.get('HTTP_X_REAL_IP', '1.1.1.1')
 
         page_request = Request.objects.create(
-            ip_address    = hash(request.META.get('REMOTE_ADDR')),
+            ip_hash       = hash(request.META.get('REMOTE_ADDR')),
             path          = trunc(request.path),
             query_params  = trunc(request.META.get('QUERY_STRING')),
             referring_url = trunc(request.META.get('HTTP_REFERER')),
@@ -69,7 +69,7 @@ class RequestLoggingMiddleware():
     def page_request_is_valid(self, request, page_request):
         return \
             page_request \
-            and page_request.ip_address == hash(request.META.get('REMOTE_ADDR')) \
+            and page_request.ip_hash == hash(request.META.get('REMOTE_ADDR')) \
             and page_request.path == request.path \
             and page_request.query_params == request.META.get('QUERY_STRING')
 
