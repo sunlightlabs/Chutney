@@ -26,7 +26,7 @@ class RequestLoggingMiddleware():
             path          = trunc(request.path),
             query_params  = trunc(request.META.get('QUERY_STRING')),
             referring_url = trunc(request.META.get('HTTP_REFERER')),
-            user_agent    = trunc(request.META.get('USER_AGENT')),
+            user_agent    = trunc(request.META.get('HTTP_USER_AGENT')),
         )
 
         request.page_request_id = page_request.id
