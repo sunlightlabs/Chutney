@@ -1,0 +1,126 @@
+{% extends "search_base.html" %}
+
+{% block body_class %}about flatText{% endblock %}
+
+{% block pagetitle %}Feedback | Checking Influence | {% endblock %}
+
+{% block js %}
+{{ block.super }}
+<style type="text/css">
+#signup label { float: none; display: inline; width: auto; }
+#signup input[type=radio] { display: inline-block; width: auto; margin-right: 5px;}
+#signup td { padding: 0px; padding-bottom: 10px; }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div id="contentHeader">
+    <h2>Checking Influence Feedback</h2>
+</div>
+
+<div id="ltColumn">
+
+<form name="signup" action="http://local.publicequalsonline.com/page/signup/Checkinginfluencesurvey" method="post" id="signup">
+<table id="signuptable">
+<tr>
+<td>
+<table width="100%">
+<tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Email</label></div>
+        <div class="input"><input type="email" class="text" size="48" id="email" name="email"></div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">First Name</label></div>
+
+        <div class="input"><input size="16" id="firstname" name="firstname" type="text" /></div></div>
+</td></tr><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Last Name</label></div>
+        <div class="input"><input size="25" id="lastname" name="lastname" type="text" /></div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Zip/Postal Code</label></div>
+        <div class="input"><input size="8" id="zip" name="zip" type="text" /></div></div>
+
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Phone</label></div>
+        <div class="input"><input type="tel" class="text" size="15" id="phone" name="phone"></div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Were you able to install the bookmarklet?</label></div>
+        <div class="input">&nbsp;&nbsp;<input id="custom-474_0" class="custom-474" name="custom-474" value="Yes" type="radio" /><label for="custom-474_0">Yes<br /></label>
+
+&nbsp;&nbsp;<input id="custom-474_1" class="custom-474" name="custom-474" value="No" type="radio" /><label for="custom-474_1">No<br /></label>
+&nbsp;&nbsp;<input id="custom-474_2" class="custom-474" name="custom-474" value="N/A" type="radio" /><label for="custom-474_2">N/A<br /></label>
+</div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Did it work for your bank?</label></div>
+        <div class="input">&nbsp;&nbsp;<input id="custom-475_0" class="custom-475" name="custom-475" value="Yes" type="radio" /><label for="custom-475_0">Yes<br /></label>
+&nbsp;&nbsp;<input id="custom-475_1" class="custom-475" name="custom-475" value="No" type="radio" /><label for="custom-475_1">No<br /></label>
+&nbsp;&nbsp;<input id="custom-475_2" class="custom-475" name="custom-475" value="N/A" type="radio" /><label for="custom-475_2">N/A<br /></label>
+
+</div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">What bank(s) did you try it on?</label></div>
+        <div class="input"><textarea rows="5" cols="50" id="custom-476" name="custom-476"></textarea></div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">If the screen did appear, did Checking Influence find matches for any of the purchases in your bank statement?</label></div>
+        <div class="input">&nbsp;&nbsp;<input id="custom-479_0" class="custom-479" name="custom-479" value="Yes" type="radio" /><label for="custom-479_0">Yes<br /></label>
+
+&nbsp;&nbsp;<input id="custom-479_1" class="custom-479" name="custom-479" value="No" type="radio" /><label for="custom-479_1">No<br /></label>
+&nbsp;&nbsp;<input id="custom-479_2" class="custom-479" name="custom-479" value="N/A" type="radio" /><label for="custom-479_2">N/A<br /></label>
+</div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Describe in more detail any problems you experienced.</label></div>
+        <div class="input"><textarea rows="5" cols="50" id="custom-481" name="custom-481"></textarea></div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+
+        <div class="label"><label class="field">Would you use it again in the future?</label></div>
+        <div class="input">&nbsp;&nbsp;<input id="custom-477_0" class="custom-477" name="custom-477" value="Yes" type="radio" /><label for="custom-477_0">Yes<br /></label>
+&nbsp;&nbsp;<input id="custom-477_1" class="custom-477" name="custom-477" value="Maybe" type="radio" /><label for="custom-477_1">Maybe<br /></label>
+&nbsp;&nbsp;<input id="custom-477_2" class="custom-477" name="custom-477" value="No" type="radio" /><label for="custom-477_2">No<br /></label>
+</div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Would you recommend this to a friend?</label></div>
+
+        <div class="input">&nbsp;&nbsp;<input id="custom-478_0" class="custom-478" name="custom-478" value="Yes" type="radio" /><label for="custom-478_0">Yes<br /></label>
+&nbsp;&nbsp;<input id="custom-478_1" class="custom-478" name="custom-478" value="Maybe" type="radio" /><label for="custom-478_1">Maybe<br /></label>
+&nbsp;&nbsp;<input id="custom-478_2" class="custom-478" name="custom-478" value="No" type="radio" /><label for="custom-478_2">No<br /></label>
+</div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">Is there anything you would change to make it more understandable? Or do you have any other feedback?</label></div>
+        <div class="input"><textarea rows="5" cols="50" id="custom-480" name="custom-480"></textarea></div></div>
+
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field">If you did not use Checking Influence, what was the primary reason?</label></div>
+        <div class="input">&nbsp;&nbsp;<input id="custom-482_0" class="custom-482" name="custom-482" value="Not interested" type="radio" /><label for="custom-482_0">Not interested<br /></label>
+&nbsp;&nbsp;<input id="custom-482_1" class="custom-482" name="custom-482" value="Don't use online banking" type="radio" /><label for="custom-482_1">Don't use online banking<br /></label>
+&nbsp;&nbsp;<input id="custom-482_2" class="custom-482" name="custom-482" value="Wasn't able to install correctly" type="radio" /><label for="custom-482_2">Wasn't able to install correctly<br /></label>
+&nbsp;&nbsp;<input id="custom-482_3" class="custom-482" name="custom-482" value="Installed bookmarklet, but didn't work" type="radio" /><label for="custom-482_3">Installed bookmarklet, but didn't work<br /></label>
+&nbsp;&nbsp;<input id="custom-482_4" class="custom-482" name="custom-482" value="Privacy Concerns" type="radio" /><label for="custom-482_4">Privacy Concerns<br /></label>
+
+&nbsp;&nbsp;<input id="custom-482_5" class="custom-482" name="custom-482" value="N/A" type="radio" /><label for="custom-482_5">N/A<br /></label>
+</div></div>
+</td></tr></table></td></tr><tr><td><table width="100%"><tr><td valign="top">
+    <div class="fieldset">
+        <div class="label"><label class="field"></label></div>
+        <div class="input"><input name="submit-btn" value="Submit Form" type="submit" /></div></div>
+</td></tr></table></td></tr><tr><td><table width="100%">
+</table>
+</td>
+</tr>
+</table>
+</form><div id="signupfooter"></div>
+</div>
+{% endblock %}
