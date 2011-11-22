@@ -422,8 +422,8 @@ var chutney = {
         if (document.location.href.indexOf(CHUTNEY_SERVER_URL) != -1 && document.location.href.indexOf('debug') == -1) {
             $("<div class='chutney-dialog chutney-error' style='width: 400px; display: none;'>")
                 .html("<h1>Chutney bookmarklet</h1><p>This is a bookmarklet, not a link &ndash; " +
-                      "to use it, drag that " +
-                      "'chutney' up to your bookmarks toolbar, or " +
+                      "to use it, drag the \"add me\" icon " +
+                      "up to your bookmarks toolbar, or " +
                       "right-click on it and choose \"Bookmark " +
                       "this\".</p><br /><p>After adding the bookmarklet, go to a " +
                       "site with bank transactions and click on it, and you'll " +
