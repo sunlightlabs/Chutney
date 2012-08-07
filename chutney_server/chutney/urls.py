@@ -11,6 +11,6 @@ urlpatterns = patterns('chutney.views',
     url(r'^survey/$', direct_to_template, {'template': 'survey.html', 'extra_context': {'IE_MEDIA_URL': settings.IE_MEDIA_URL}}, name='survey'),
     url(r'^$', direct_to_template, {
         'template': 'chutney/home.html', 
-        'extra_context': {'SERVER_URL': settings.SERVER_URL, 'FORCE_HTTPS': settings.FORCE_HTTPS, 'IE_MEDIA_URL': settings.IE_MEDIA_URL}
+        'extra_context': {'SERVER_URL': settings.SERVER_URL, 'FORCE_HTTPS': settings.FORCE_HTTPS, 'IE_MEDIA_URL': settings.IE_MEDIA_URL, 'IE_BASE_URL': 'http://influenceexplorer.com/', 'DATA_BASE_URL': 'http://data.influenceexplorer.com'}
     }, name='home')
 )
